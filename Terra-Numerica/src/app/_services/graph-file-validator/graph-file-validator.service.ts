@@ -5,28 +5,25 @@ import { Injectable } from '@angular/core';
 })
 export class GraphFileValidatorService {
 
-  // Properties that should be present
   private BASIC_PROPERTIES = ['typology', 'nodes', 'links'];
   private GRID_PROPERTIES = ['width', 'height'];
   private TREE_PROPERTY = ['arity'];
 
-  // Validity constant
   private TYPOLOGY_VALUES = ['grid', 'tore', 'tree', 'cycle', 'common', 'copsAlwaysWin']
   private MIN_NODES_NUM = 4;
   private MAX_NODES_NUM = 70;
 
-  private fileContent;
+  private fileContent: any;
 
   constructor() { }
 
-  setContentToValidate(fileContent) {
+  setContentToValidate(fileContent: any) {
     this.fileContent = fileContent;
   }
 
   get missing_properties() {
     const missing = [];
     const present_properties = Object.keys(this.fileContent);
-    //console.log('OBJECT PROPERTIES', present_properties);
     this.BASIC_PROPERTIES.forEach(prop => {
       if(!present_properties.includes(prop)) missing.push(prop);
     })

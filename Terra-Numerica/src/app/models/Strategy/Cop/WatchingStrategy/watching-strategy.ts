@@ -3,12 +3,7 @@ import { Grid } from 'src/app/models/Graph/Grid/grid';
 import { Pawns } from 'src/app/models/Pawn/pawn';
 import { IStrategy } from '../../istrategy';
 
-/**
- * This is a cop strategy.
- * In this strategy, when moving the cop tries to go on a vertex that watch the maximum of vertex accessible by the thief. 
- * If all vertexes accessible by the cop, don't watch any vertex accessible by the thief, the cop will choose a vertex that reduce 
- * his distance to thief thief. 
- */
+
 export class WatchingStrategy implements IStrategy {
     actual_place: any;
     stay_on_spot = 0;

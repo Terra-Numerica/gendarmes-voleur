@@ -7,7 +7,7 @@ export class GameActionStack {
         this.stack = [];
     }
 
-    //Stack function
+    
     push(el: GameAction) {
         this.stack.push(el);
     }
@@ -32,7 +32,7 @@ export class GameActionStack {
         this.stack = [];
     }
 
-    //Utils function
+    
     cancelAction(): boolean {
         if(this.isEmpty()) return false;
         const action = this.pop();

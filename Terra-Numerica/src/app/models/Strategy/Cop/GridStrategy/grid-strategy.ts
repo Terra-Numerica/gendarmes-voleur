@@ -4,14 +4,7 @@ import { Graph } from 'src/app/models/Graph/graph';
 import { Grid } from 'src/app/models/Graph/Grid/grid';
 import { GameService } from 'src/app/_services/game/game.service';
 
-/**
- * This is a cop strategy. This strategy will be chosen if they're more than 2 cops on a grid type graph.
- * Cops following this strategy will all be placed one above the other on the last collumn of the grid and
- * then they'll start to move to the left in order to find the thief. If the thief decide to try to pass below
- * the cops column then all the column will go down to keep chasing the thief (this way it also work on torique grid)
- * will be improved => one cops can be placed every 3 node before another cops is placed, it makes enough cops to 
- * prevent the thief to try to go trough the cops column  
- */
+
 export class GridStrategy implements IStrategy {
     actual_place: any; 
     cops_placement: string;
@@ -81,21 +74,21 @@ export class GridStrategy implements IStrategy {
                 }               
                 break;
         }
-        // let distance = graph.nodes.length;
-        // let edges = graph.edges(this.actual_place);
-        // edges.push(this.actual_place);
-        // edges = edges.filter(e => !(cops_position_slot.includes(e)))
-        // for(const e of edges) {
-        //     let globalDist = 0;
-        //     for(const t of thiefs_position_slot) {
-        //         const d = graph.distance(e, t);
-        //         globalDist += d !== -1 ? d : 0;
-        //     }
-        //     if(globalDist <= 1) {
-        //         this.actual_place = e;
-        //         distance = globalDist;
-        //     }
-        // }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         return this.actual_place;
     }
 

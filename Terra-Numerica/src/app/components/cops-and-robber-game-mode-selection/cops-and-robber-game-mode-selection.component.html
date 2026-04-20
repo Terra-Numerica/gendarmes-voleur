@@ -1,29 +1,117 @@
 <div class="selection">
-    <div class="card header">
-        <img src="assets/logo-TN.png" alt="Logo Terra Numerica">
-        <h1>Jeu des gendarmes et du voleur dans les graphes</h1>
+
+  
+  <div class="bg-graph" aria-hidden="true">
+    <svg class="bg-graph__svg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      
+      <g class="bg-edges" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" fill="none">
+        <line x1="120" y1="140" x2="380" y2="260"/>
+        <line x1="380" y1="260" x2="600" y2="120"/>
+        <line x1="600" y1="120" x2="820" y2="280"/>
+        <line x1="820" y1="280" x2="1080" y2="160"/>
+        <line x1="380" y1="260" x2="480" y2="480"/>
+        <line x1="600" y1="120" x2="480" y2="480"/>
+        <line x1="820" y1="280" x2="700" y2="520"/>
+        <line x1="480" y1="480" x2="700" y2="520"/>
+        <line x1="700" y1="520" x2="950" y2="580"/>
+        <line x1="1080" y1="160" x2="950" y2="580"/>
+        <line x1="120" y1="140" x2="480" y2="480"/>
+        <line x1="240" y1="580" x2="480" y2="480"/>
+        <line x1="240" y1="580" x2="700" y2="520"/>
+      </g>
+      
+      <g class="bg-nodes" fill="rgba(255,255,255,0.12)">
+        <circle cx="120"  cy="140" r="7"/>
+        <circle cx="380"  cy="260" r="9"/>
+        <circle cx="600"  cy="120" r="8"/>
+        <circle cx="820"  cy="280" r="10"/>
+        <circle cx="1080" cy="160" r="7"/>
+        <circle cx="480"  cy="480" r="11"/>
+        <circle cx="700"  cy="520" r="9"/>
+        <circle cx="950"  cy="580" r="7"/>
+        <circle cx="240"  cy="580" r="8"/>
+      </g>
+    </svg>
+  </div>
+
+  
+  <header class="ms-header">
+    <div class="ms-header__logo">
+      <img src="assets/logo-TN.png" alt="Logo Terra Numerica" class="ms-header__logo-img">
+    </div>
+    <div class="ms-header__text">
+      <span class="ms-header__eyebrow">Terra Numerica</span>
+      <h1 class="ms-header__title">Gendarmes &amp; Voleur<br><em>dans les graphes</em></h1>
+    </div>
+  </header>
+
+  
+  <main class="ms-grid">
+
+    <div class="ms-card ms-card--play" (click)="configureFreeGame()" tabindex="0" role="button">
+      <div class="ms-card__glow"></div>
+      <div class="ms-card__icon-wrap">
+        <img src="assets/mode-selection/free-game.svg" alt="" class="ms-card__icon">
+      </div>
+      <div class="ms-card__body">
+        <span class="ms-card__tag">Jouer</span>
+        <h2 class="ms-card__name">Mode libre</h2>
+        <p class="ms-card__desc">Configurez votre plateau, vos adversaires et lancez la partie.</p>
+      </div>
+      <span class="ms-card__arrow">→</span>
     </div>
 
-    <div class="game-mode-selection">
-        <div class="game-mode card" (click)="configureFreeGame()">
-            <img src="assets/mode-selection/free-game.svg">
-            Mode libre
-        </div>
-        <div class="game-mode card" (click)="configureAdventure()">
-            <img src="assets/mode-selection/adventure.svg">
-            Aventure (Bêta)
-        </div>
-        <div class="game-mode card editor" routerLink="/graph-constructor">
-            <img src="assets/mode-selection/editor.svg">
-            Éditeur de graphe
-        </div>
-        <div class="game-mode card" (click)="displayRules()">
-            <img src="assets/menu/rules.svg">
-            Voir les règles
-        </div>
-        <div class="game-mode card" routerLink="/credit">
-            <img src="assets/mode-selection/hand-shake.svg">
-            Crédits
-        </div>
+    <div class="ms-card ms-card--adventure" (click)="configureAdventure()" tabindex="0" role="button">
+      <div class="ms-card__glow"></div>
+      <div class="ms-card__icon-wrap">
+        <img src="assets/mode-selection/adventure.svg" alt="" class="ms-card__icon">
+      </div>
+      <div class="ms-card__body">
+        <span class="ms-card__tag">Bêta</span>
+        <h2 class="ms-card__name">Aventure</h2>
+        <p class="ms-card__desc">Progressez à travers des niveaux avec des défis croissants.</p>
+      </div>
+      <span class="ms-card__arrow">→</span>
     </div>
+
+    <div class="ms-card ms-card--editor editor" routerLink="/graph-constructor" tabindex="0" role="button">
+      <div class="ms-card__glow"></div>
+      <div class="ms-card__icon-wrap">
+        <img src="assets/mode-selection/editor.svg" alt="" class="ms-card__icon">
+      </div>
+      <div class="ms-card__body">
+        <span class="ms-card__tag">Outil</span>
+        <h2 class="ms-card__name">Éditeur de graphe</h2>
+        <p class="ms-card__desc">Créez et importez vos propres plateaux de jeu personnalisés.</p>
+      </div>
+      <span class="ms-card__arrow">→</span>
+    </div>
+
+    <div class="ms-card ms-card--rules" (click)="displayRules()" tabindex="0" role="button">
+      <div class="ms-card__glow"></div>
+      <div class="ms-card__icon-wrap">
+        <img src="assets/menu/rules.svg" alt="" class="ms-card__icon">
+      </div>
+      <div class="ms-card__body">
+        <span class="ms-card__tag">Info</span>
+        <h2 class="ms-card__name">Voir les règles</h2>
+        <p class="ms-card__desc">Comprenez les mécaniques du jeu avant de vous lancer.</p>
+      </div>
+      <span class="ms-card__arrow">→</span>
+    </div>
+
+    <div class="ms-card ms-card--credits" routerLink="/credit" tabindex="0" role="button">
+      <div class="ms-card__glow"></div>
+      <div class="ms-card__icon-wrap">
+        <img src="assets/mode-selection/hand-shake.svg" alt="" class="ms-card__icon">
+      </div>
+      <div class="ms-card__body">
+        <span class="ms-card__tag">Équipe</span>
+        <h2 class="ms-card__name">Crédits</h2>
+        <p class="ms-card__desc">Découvrez les contributeurs du projet Terra Numerica.</p>
+      </div>
+      <span class="ms-card__arrow">→</span>
+    </div>
+
+  </main>
 </div>

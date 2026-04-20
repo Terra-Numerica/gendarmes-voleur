@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import * as d3 from 'd3';
@@ -26,7 +25,7 @@ export class GraphService {
 
   private cops_position_slot = [];
 
-  constructor(private randomGraph: RandomGraphService, private router: Router, private http: HttpClient) {
+  constructor(private randomGraph: RandomGraphService, private router: Router) {
     if (localStorage.getItem("method") !== null) {
       switch(localStorage.getItem("method")) {
         case "generate":
@@ -128,7 +127,6 @@ export class GraphService {
     let nodes = this.generatesNodes(size);
     let links = [];
 
-    // LINKS HORIZONTALS
     for (let i = 0 ; i < height*width ; i += width) {
       for (let j = 0 ; j < width-1 ; ++j) {
         links.push({
@@ -138,7 +136,6 @@ export class GraphService {
       }
     }
 
-    // LINKS VERTICAL
     for (let i = 0 ; i < (height-1)*width ; ++i) {
       links.push({
         source: i,
@@ -154,7 +151,6 @@ export class GraphService {
     let nodes = this.generatesNodes(size);
     let links = [];
 
-    // LINKS HORIZONTALS
     for (let i = 0 ; i < height*width ; i += width) {
       for (let j = 0 ; j < width-1 ; ++j) {
         links.push({
@@ -164,7 +160,6 @@ export class GraphService {
       }
     }
 
-    // LINKS VERTICAL
     for (let i = 0 ; i < (height-1)*width ; ++i) {
       links.push({
         source: i,
@@ -172,7 +167,6 @@ export class GraphService {
       })
     }
 
-    // VERTICAL TORE
     for (let i = 0 ; i < width ; ++i) {
       links.push({
         source: i,
@@ -180,7 +174,6 @@ export class GraphService {
       })
     }
 
-    // HORIZONTAL TORE
     for (let i = 0 ; i < height*width ; i += width) {
       links.push({
         source: i,
@@ -256,7 +249,6 @@ export class GraphService {
     return subset;
   }
 
-  // Generate a random number between "start" (include) and "end" (exclude)
   private randomInRange(start, end) {
     return Math.floor(Math.random() * (end - start) + start);
   }
@@ -267,7 +259,7 @@ export class GraphService {
 
     for(let i=n-2; i>=0; i--) {
       let index = this.randomInRange(i, n);
-      while(index === i) { // Check if random selected node is not the current node
+      while(index === i) {
         index = this.randomInRange(i, n);
       }
       const neighbors = this.neighbors(index, links);
@@ -285,17 +277,13 @@ export class GraphService {
   private async generatePetersen() {
     const blob = await this.downloadAssets('petersen');
     const file = new File([blob], 'petersen.json');
-    /* console.log('FILE',file); */
     await this.loadGraphFromFile(file);
-    /* console.log('HERE'); */
   }
 
   private async generateDodecahedron() {
     const blob = await this.downloadAssets('dodecahedron');
     const file = new File([blob], 'dodecahedron.json');
-    /* console.log('FILE',file); */
     await this.loadGraphFromFile(file);
-    /* console.log('HERE'); */
   }
 
   private async generateFromFile(filename: string) {
@@ -304,14 +292,9 @@ export class GraphService {
     await this.loadGraphFromFile(file);
   }
 
-  private downloadAssets(name: string): Promise<Blob> {
-    return new Promise((resolve) => {
-      this.http.get(`assets/${name}.json`, {responseType: 'blob'}).subscribe(data => {
-        /* console.log(data) */
-        resolve(data)
-      })
-    })
-    
+  private async downloadAssets(name: string): Promise<Blob> {
+    const response = await fetch(`assets/${name}.json`);
+    return await response.blob();
   }
 
   readAsync(file: File): Promise<Graph> {
@@ -332,7 +315,6 @@ export class GraphService {
     this.inputFile = file;
     const config = await this.readAsync(file);
     this.importGraph(config);
-    /* console.log('THERE'); */
   }
 
   importGraph(config) {
@@ -383,49 +365,58 @@ export class GraphService {
   }
 
   showPossibleMove(vertex, speed) {
-    const edges = this.graph.edges(vertex.__data__, speed, this.cops_position_slot);
-    edges.push(vertex.__data__)
-    d3.selectAll(".circle").style("fill", '#69b3a2');
-    if(this.gameMode === "easy" || this.gameMode === "medium") {
-      d3.selectAll(".circle").filter(function(d: any) {
-        return edges.includes(d);
-      }).style("fill", "#05B800");
-      vertex.style.fill = "blue"
+    const node = vertex.__data__;
+    const edges = this.graph.edges(node, speed, this.cops_position_slot);
+    edges.push(node)
+    
+    const circles = d3.selectAll(".circle");
+    if (!circles.empty()) {
+      circles.style("fill", '#69b3a2');
+      if(this.gameMode === "easy" || this.gameMode === "medium") {
+        circles.filter(function(d: any) {
+          return edges.includes(d);
+        }).style("fill", "#05B800");
+        if (vertex.style) vertex.style.fill = "blue";
+      }
     }
 
     return edges;
   }
 
   showPossibleMoveDragging(vertex, lastPos, speed) {
-    const edges = this.graph.edges(vertex.__data__, speed, this.cops_position_slot)
-    edges.push(vertex.__data__)
-    d3.selectAll(".circle").style("fill", '#69b3a2');
-    if(this.gameMode === "easy" || this.gameMode === "medium") {
-      d3.selectAll(".circle").filter(function(d: any) {
-        return edges.some(n => n.index === d.index);
-      }).style("fill", "orange");
-      vertex.style.fill = "#05B800"
-      lastPos.style.fill = "blue"
-
+    const node = vertex.__data__;
+    const edges = this.graph.edges(node, speed, this.cops_position_slot)
+    edges.push(node)
+    
+    const circles = d3.selectAll(".circle");
+    if (!circles.empty()) {
+      circles.style("fill", '#69b3a2');
+      if(this.gameMode === "easy" || this.gameMode === "medium") {
+        circles.filter(function(d: any) {
+          return edges.some(n => n.index === d.index);
+        }).style("fill", "orange");
+        if (vertex.style) vertex.style.fill = "#05B800";
+        if (lastPos && lastPos.style) lastPos.style.fill = "blue";
+      }
     }
 
     return edges;
   }
 
   showCopsPossibleMoves(cops, show) {
-    /* console.log('COPS', cops) */
     const edges = this.graph.edges(cops)
     edges.push(cops)
-    if(this.gameMode === "easy" || this.gameMode === "medium") {
+    
+    const circles = d3.selectAll(".circle");
+    if (!circles.empty()) {
       if(show){
-        d3.selectAll(".circle").filter(function(d: any) {
-          return edges.some(n => n.index === d.index);
+        circles.filter(function(d: any) {
+          return edges.some(n => ((n as any).id !== undefined ? (n as any).id : n.index) === (d.id !== undefined ? d.id : d.index));
         }).style("fill", "red");
       }else{
-        d3.selectAll(".circle").filter(function(d: any) {
-          return edges.some(n => n.index === d.index);
+        circles.filter(function(d: any) {
+          return edges.some(n => ((n as any).id !== undefined ? (n as any).id : n.index) === (d.id !== undefined ? d.id : d.index));
         }).style("fill", '#69b3a2');
-        /* this.pawnsToForeground(); */
       }
     }
 

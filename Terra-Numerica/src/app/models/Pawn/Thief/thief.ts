@@ -6,33 +6,19 @@ import { Pawns } from '../pawn';
 
 export class Thief extends Pawns {
 
-    /**
-     * Concrete Pawn object
-     * @param gameM 
-     * @param graphServ 
-     * @param {number} x - X position of the pawn when drawed for the first time on a canvas
-     * @param {number} y - Y position of the pawn when drawed for the first time on a canvas
-     */
+    
     constructor(private gameM: GameService, private graphServ: GraphService, x: number, y: number){
         super(gameM, graphServ, x, y);
         this.role = "thief"
         this.strategy = new RunawayStrategy();
-        d3.select("svg")
-        .append('circle')
-            .datum(this)
-            .attr("class", "pawns "+ this.role)
-            .attr("cx", this.x)
-            .attr("cy", this.y)
-            .attr("r", this.radius)
-            .attr("fill", "url(#pawnThiefImage)")
-            .call(d3.drag()
-                .on("start", this.dragstarted.bind(this))
-                .on("drag", this.dragged.bind(this))
-                .on("end", this.dragended.bind(this)));
-
+        
+        
     }
 
-    updatePosition(node) {
-        if(node) this.gameM.updateThiefPosition(this, node);
+    updatePosition(node: any) {
+        if (node) {
+            this.currentNodeId = node.id !== undefined ? Number(node.id) : Number(node.index);
+            this.gameM.updateThiefPosition(this, node);
+        }
     }
 }

@@ -1,9 +1,7 @@
 import { IStrategy } from '../../istrategy';
 import { Graph } from 'src/app/models/Graph/graph';
 
-/**
- * This is a cop strategy. It will minimise the global distance with all thief.
- */
+
 export class OneCopsWinStrategy implements IStrategy {
     actual_place: any;   
     thiefFound: boolean = false
@@ -19,41 +17,45 @@ export class OneCopsWinStrategy implements IStrategy {
 
     move(graph: Graph, cops_position_slot: any[], thiefs_position_slot: any[], speed) {
         let closest;
-        let distance = graph.nodes.length;
+        let distance = graph.nodes.length + 1;
         const edges = graph.edges(this.actual_place);
         edges.push(this.actual_place);
+        
         if(!this.thiefFound){
             for(const e of edges) {
                 let globalDist = 0;
+                const eId = (e as any).id !== undefined ? (e as any).id : e.index;
+
                 for(const t of thiefs_position_slot) {
+                    if (!t) continue;
                     const d = graph.distance(e, t);
                     globalDist += d !== -1 ? d : 0;
-                    let thiefEdges = graph.edges(thiefs_position_slot[thiefs_position_slot.length - 1])
+                    
+                    const tId = (t as any).id !== undefined ? (t as any).id : (t.index !== undefined ? t.index : t);
+                    let thiefEdges = graph.edges(t);
                     thiefEdges.forEach(thiefedge => {
-                        if(e===thiefedge){
+                        const teId = (thiefedge as any).id !== undefined ? (thiefedge as any).id : thiefedge.index;
+                        if(eId === teId){
                             this.tempo = true;
                         }
                     })
-                    
                 }
 
                 if((!closest || globalDist <= distance) && !this.thiefFound){
                     closest = e;
                     distance = globalDist;
-                    console.log(this.tempo)
                     if(this.tempo){
                         this.thiefFound = true
                         this.lastThiefPos = thiefs_position_slot[0]
                     }
                 }
-
             }
-        }else if(this.thiefFound){
-            closest = this.lastThiefPos;
-            this.lastThiefPos = thiefs_position_slot[0]
+        } else if(this.thiefFound){
+            closest = this.lastThiefPos || edges[0];
+            this.lastThiefPos = thiefs_position_slot[0];
         }
-        console.log(thiefs_position_slot)
-        this.actual_place = closest;
+
+        this.actual_place = closest || edges[0];
         return this.actual_place;
     }
 

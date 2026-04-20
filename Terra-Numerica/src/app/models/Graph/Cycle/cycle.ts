@@ -6,10 +6,7 @@ export class Cycle extends Graph {
         super(nodes, links, "cycle");
     }
 
-    /**
-     * Initialise the d3 force simulation to work with a network
-     * @param svg d3 selection of an html svg
-     */
+    
     simulate(svg: any) {
         const width = parseInt(svg.style("width"), 10);
         const height = parseInt(svg.style("height"), 10);
@@ -34,9 +31,7 @@ export class Cycle extends Graph {
         this.simulation.stop();
     }
     
-    /**
-     * Function needed for the placement of the nodes and links in the d3 force simulation
-     */
+    
     ticked() {
         this.svgLinks
             .attr("x1", function(d) { return d.source.x; })

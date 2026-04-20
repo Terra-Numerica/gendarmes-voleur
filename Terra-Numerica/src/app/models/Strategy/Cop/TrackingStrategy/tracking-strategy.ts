@@ -1,9 +1,7 @@
 import { Graph } from 'src/app/models/Graph/graph';
 import { IStrategy } from '../../istrategy';
 
-/**
- * This is a cop strategy. It will minimise the global distance with all thief.
- */
+
 export class TrackingStrategy implements IStrategy {
     actual_place: any;
 
@@ -14,13 +12,29 @@ export class TrackingStrategy implements IStrategy {
 
     move(graph: Graph, cops_position_slot: any[], thiefs_position_slot: any[], speed) {
         let closest;
-        let distance = graph.nodes.length;
+        let distance = graph.nodes.length + 1;
         let edges = graph.edges(this.actual_place);
         edges.push(this.actual_place);
-        edges = edges.filter(e => !cops_position_slot.some(c => c.index === e.index))
+        
+        
+        edges = edges.filter(e => {
+            const eId = (e as any).id !== undefined ? (e as any).id : e.index;
+            return !cops_position_slot.some(c => {
+                if (!c) return false;
+                const cId = (c as any).id !== undefined ? (c as any).id : (c.index !== undefined ? c.index : c);
+                return cId === eId;
+            });
+        });
+
+        
+        if (edges.length === 0) {
+            edges = [this.actual_place];
+        }
+
         for(const e of edges) {
             let globalDist = 0;
             for(const t of thiefs_position_slot) {
+                if (!t) continue;
                 const d = graph.distance(e, t);
                 globalDist += d !== -1 ? d : 0;
             }
@@ -30,7 +44,7 @@ export class TrackingStrategy implements IStrategy {
                 distance = globalDist;
             }
         }
-        this.actual_place = closest;
+        this.actual_place = closest || this.actual_place;
         return this.actual_place;
     }
 }

@@ -1,36 +1,89 @@
-<div id="top-hud">
-    <div id="top-hud-menu-button" class="card">
-        <button (click)="gameManager.goBackToMenu()"><img class="menu-button-img-preview" src="assets/board/home.svg"/></button>
-        <button (click)="replay()"><img class="menu-button-img-preview" src="assets/board/refresh.svg"/></button>
-        <button (click)="displayInfo()">
-            <img class="menu-button-img-preview" src="assets/board/info.svg" alt="">
-        </button>
-    </div>
-    <div id="top-hud-turn-information">
-        <div id="top-hud-turn-information-number" class="card">
-            <span *ngIf="getRemainingTurnCount() > 0">
-                Nombre de tours restant : {{getRemainingTurnCount()}}
-            </span>
-            <span *ngIf="getRemainingTurnCount() == 0">
-                Dernier tour de jeu.
-            </span>
-            <span *ngIf="getRemainingTurnCount() < 0">
-                Fin de partie !
-            </span>
-        </div>
-        <div id="top-hud-turn-information-details" class="card">
-            Chargement du plateau de jeu ...
-        </div>
-    </div>
-</div>
+<div class="game-container">
 
-<div id="visualizer" class="card"></div>
+  <div #visualizer id="visualizer"></div>
 
-<div id="bottom-hud" class="card">
-    <div id="games-action">
-        <button [disabled]="!gameHasStarted() || !isPlayerTurn()" (click)="validateTurn()">Finir son tour</button>
-        <button *ngIf="gameMode !== 'extreme'" [disabled]="isGameActionEmpty() || getTurnCount() === 0" (click)="cancelAction()">Annuler action</button>
-        <button *ngIf="gameMode == 'easy'" (click)="seeWarningZone()">Zone de danger</button>
-        <button *ngIf='isNodeMoveable()' [class]="getMovingNodeClass()" (click)="moveNodeMode()">Déplacer les sommets</button>
+  
+  <div class="scanlines"></div>
+
+  
+  <div class="corner corner--tl"></div>
+  <div class="corner corner--tr"></div>
+  <div class="corner corner--bl"></div>
+  <div class="corner corner--br"></div>
+
+  
+  <div id="top-hud">
+
+    <div class="hud-block menu-buttons">
+      <button class="icon-btn" (click)="gameManager.goBackToMenu()" title="Menu">
+        <span class="icon-btn__icon">⌂</span>
+        <span class="icon-btn__label">Menu</span>
+      </button>
+      <div class="btn-divider"></div>
+      <button class="icon-btn" (click)="replay()" title="Rejouer">
+        <span class="icon-btn__icon">↺</span>
+        <span class="icon-btn__label">Replay</span>
+      </button>
+      <div class="btn-divider"></div>
+      <button class="icon-btn" (click)="displayInfo()" title="Règles">
+        <span class="icon-btn__icon">?</span>
+        <span class="icon-btn__label">Règles</span>
+      </button>
     </div>
+
+    <div class="hud-block turn-info">
+      <div class="turn-counter">
+        <span class="label">TOURS</span>
+        <span class="value" [class.critical]="getRemainingTurnCount() <= 2">
+          <ng-container *ngIf="getRemainingTurnCount() > 0">{{ getRemainingTurnCount() }}</ng-container>
+          <ng-container *ngIf="getRemainingTurnCount() == 0">⚠ 0</ng-container>
+          <ng-container *ngIf="getRemainingTurnCount() < 0">FIN</ng-container>
+        </span>
+      </div>
+      <div class="turn-divider"></div>
+      <div class="turn-status">
+        <span class="label">STATUT</span>
+        <span class="value status-text" id="top-hud-turn-information-details">Initialisation...</span>
+      </div>
+    </div>
+
+  </div>
+
+  
+  <div id="bottom-hud">
+    <div class="actions-panel">
+
+      <button class="action-btn action-btn--validate"
+        [disabled]="!gameHasStarted() || !isPlayerTurn()"
+        (click)="validateTurn()">
+        <span class="action-btn__glyph">▶</span>
+        <span>Finir le tour</span>
+      </button>
+
+      <button class="action-btn action-btn--cancel"
+        *ngIf="gameMode !== 'extreme'"
+        [disabled]="isGameActionEmpty() || getTurnCount() === 0"
+        (click)="cancelAction()">
+        <span class="action-btn__glyph">⟵</span>
+        <span>Annuler</span>
+      </button>
+
+      <button class="action-btn action-btn--danger"
+        *ngIf="gameMode == 'easy'"
+        (click)="seeWarningZone()">
+        <span class="action-btn__glyph">◈</span>
+        <span>Zone danger</span>
+      </button>
+
+      <button class="action-btn action-btn--toggle"
+        *ngIf="isNodeMoveable()"
+        [class.is-active]="movingNodes"
+        (click)="moveNodeMode()">
+        <span class="action-btn__glyph">✥</span>
+        <span>{{ movingNodes ? 'Verrouiller' : 'Déplacer les noeuds' }}</span>
+      </button>
+
+    </div>
+  </div>
+
 </div>

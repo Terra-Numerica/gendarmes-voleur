@@ -9,11 +9,11 @@ import Swal, { SweetAlertOptions } from 'sweetalert2';
 })
 export class AdminBoardComponent implements OnInit {
   
-  // const string of type that are available to be selected
+  
   public ADD_GRAPH = 'add-graph';
   public DASHBOARD = 'dashboard';
 
-  public type = this.ADD_GRAPH; // possible value are: 'dashboard', 'add-graph'
+  public type = this.ADD_GRAPH; 
 
   private PASSWORD = 'admin';
 
@@ -61,12 +61,7 @@ export class AdminBoardComponent implements OnInit {
     })
   }
 
-  /**
-   * Cette fonction vérifier si le mot de passe passer en paramètre est correct. Si le mot de passe est correct la fonction renvoie 'true'
-   * sinon la fonction renvoie false
-   * 
-   * @param pwd mot de passe saissie par l'utilisateur
-   */
+  
   private checkPassword(pwd: string) {
     return pwd === this.PASSWORD;
   }

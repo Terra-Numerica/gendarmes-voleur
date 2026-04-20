@@ -1,9 +1,7 @@
 import { Graph } from 'src/app/models/Graph/graph';
 import { IStrategy } from '../../istrategy';
 
-/**
- * This is a thief strategy. It will maximise the global distance with all cops.
- */
+
 export class RunawayStrategy implements IStrategy {
     actual_place: any;
 
@@ -23,11 +21,7 @@ export class RunawayStrategy implements IStrategy {
                 this.actual_place = graph.getRandomEdge();
             }
         }
-        /* console.log("OUT OF THE LOOP", this.actual_place)
-        console.log("POSITION", cops_position_slot)
-        cops_position_slot.forEach((c) => {
-            console.log(graph.distance(this.actual_place, c))
-        }) */
+        
         return this.actual_place;
     }
 

@@ -1,194 +1,173 @@
 <div class="game-menu">
 
-    <div class="card header">
-        <!-- <button routerLink="/admin">Administration</button> -->
-        <button routerLink="/game-mode-selection">
-            <img src="assets/arrow.svg" alt="">
-        </button>
-        <h1 class="title">Jeu libre</h1>
-        <button (click)="displayRules()">
-            <!-- <img src="assets/menu/rules.svg" alt=""> -->
-            <p>Règles</p>
-        </button>
-        <!-- <button [disabled]="checkGraphParamIssues()" (click)="validateParams()">Commencer la partie</button> -->
+  
+  <header class="gm-header">
+    <button class="gm-header__back" routerLink="/game-mode-selection" title="Retour">
+      <img src="assets/arrow.svg" alt="retour">
+    </button>
+    <div class="gm-header__center">
+      <span class="gm-header__eyebrow">Terra Numerica</span>
+      <h1 class="gm-header__title">Jeu libre</h1>
     </div>
+    <button class="gm-header__rules" (click)="displayRules()">Règles</button>
+  </header>
 
-    <div class="game-param">
-
-        <div class="col1">
-            <div class="graph-selection">
-                <div class="graph-generation card" (click)="selectGraphGeneration()">
-                    <h2 class="subtitle">Choisissez un plateau de jeu</h2>
-                    <div class="graph-generation-topology-selection">
-                        <div class="graph-topology-preview-list">
-                            <div class="graph-topology-preview-list-item card" *ngFor='let type of availableGraphType'
-                                (click)="selectGraphType(type)" [class]="isSelectedGraphType(type)">
-                                <img id="{{type}}" class="graph-topology-preview-list-item-img"
-                                    src="assets/menu/graph-img/{{type}}.svg">
-                                <label for="{{type}}">{{translator.graphTypeName(type)}}</label>
-                            </div>
-
-                            <div class="graph-typology-preview-list-item graph-importation card" [class]="isSelectedGraphType('import')">
-                                <div class="item-import file-label">
-                                    <input (click)="selectGraphType('import')" id="graph-file-input" name="graph-file-input" class="input-file" type="file"
-                                        accept="application/json" (change)="onFileChange($event.target.files[0])">
-                                    <label *ngIf="!selectedFileName" id="label-import-file" for="graph-file-input">
-                                        Choissisez un fichier...
-                                    </label>
-                                    <label *ngIf="selectedFileName" id="label-import-file" for="graph-file-input">
-                                        {{selectedFileName}}
-                                    </label>
-                                </div>
-                                <label class="item-import-label">Importer un graphe</label>
-                            </div>
-
-                        </div> <!-- .graph-topology-preview-list -->
-                    </div> <!-- .graph-generation-topology-selection -->
-
-                    <div *ngIf="paramsNames.length > 0" class="graph-generation-parameters">
-                        <h2 class="subtitle">Paramètres supplémentaires</h2>
-                        <form class="form-field">
-                            <!-- First row of the grid -->
-                            <label *ngIf="paramsNames.length > 0" for="param1" class="form-field-labels">
-                                {{paramsNames[0]}}
-                            </label>
-                            <input #param1Input *ngIf="paramsNames.length > 0" [(ngModel)]="config['graphParam1']"
-                                [min]="paramsBoundaries[selectedGraphType].param1" (blur)="onBlur($event)"
-                                id="param1" class="form-field-inputs" type="number"
-                                name="param1">
-                            <button class="form-minus-btn" (click)="updateNumberFieldValue('graphParam1', config, update_action.decrease)">-</button>
-                            <button class="form-plus-btn" (click)="updateNumberFieldValue('graphParam1', config, update_action.increase)">+</button>
-                            
-                            <!-- Second row of the grid -->
-                            <label *ngIf="paramsNames.length > 1" for="param2" class="form-field-labels">
-                                {{paramsNames[1]}}
-                            </label>
-                            <input #param2Input *ngIf="paramsNames.length > 1" [(ngModel)]="config['graphParam2']"
-                                [min]="paramsBoundaries[selectedGraphType].param2" (blur)="onBlur($event)" id="param2"
-                                class="form-field-inputs" type="number" name="param2">
-                            <button class="form-minus-btn" (click)="updateNumberFieldValue('graphParam2', config, update_action.decrease)">-</button>
-                            <button class="form-plus-btn" (click)="updateNumberFieldValue('graphParam2', config, update_action.increase)">+</button>
-                        </form>
-                    </div> <!-- .graph-generation-parameters -->
-                </div> <!-- .graph-generation -->
-
-                <!-- <div class="graph-importation card" (click)="selectGraphImportation()"
-                    [class]="isSeletectedGraphImportation()">
-                    <h2 class="subtitle">Importer un plateau de jeu</h2>
-                    <input id="graph-file-input" name="graph-file-input" class="input-file" type="file"
-                        accept="application/json" (change)="onFileChange($event.target.files[0])">
-                    <label id="label-import-file" for="graph-file-input" class="file-label">
-                        <span *ngIf="!selectedFileName">Choissisez un fichier...</span>
-                        <span *ngIf="selectedFileName"> {{selectedFileName}} </span>
-                    </label>
-                </div --> <!-- .graph-importation -->
-            </div> <!-- .graph-selection -->
-        </div> <!-- .col1 -->
-
-        <div class="col2">
-            <div class="oponent-selection card">
-                <div class="player-option">
-                    <h2 class="subtitle">Choisissez votre adversaire</h2>
-                    <div class="player-option-list">
-                        <div class="player-option-item card" *ngFor="let type of availableOpponentType"
-                            [class]='isSelectedOponent(type)' (click)="selectPlayer(type)">
-                            <img id="{{type}}" class="vs" src="assets/menu/opponent-type/vs_{{type}}.svg" />
-                            <label for="{{type}}">{{translator.opponentTypeName(type)}}</label>
-                        </div>
-                    </div>
-                </div> <!-- .player-option -->
-
-                <div class="ai-side" *ngIf='selectedOpponentType === "ai"'>
-                    <h2 class="subtitle">Choisissez votre camp</h2>
-                    <div class="side-selection">
-                        <div class="side-selection-list">
-                            <div class="side-selection-list-item" for="cops" (click)="setSelectedAi('cops')"
-                                [class]="isSelectedCopsAi()">
-                                <img class="side-selection-list-item-img-preview" for="cops"
-                                    src="assets/menu/opponent-type/thief.svg" />
-                                <label for="cops">Voleur</label>
-                                <input [(ngModel)]="selectedAi" type="radio" id="cops" name="ai-side" value="cops">
-                            </div>
-                            <div class="side-selection-list-item" for="thief" (click)="setSelectedAi('thief')"
-                                [class]="isSelectedThiefAi()">
-                                <img class="side-selection-list-item-img-preview" for="thief"
-                                    src="assets/menu/opponent-type/police.svg" />
-                                <label for="thief">Gendarme</label>
-                                <input [(ngModel)]="selectedAi" type="radio" id="thief" name="ai-side" value="thief">
-                            </div>
-                        </div> <!-- .side-selection-list -->
-                    </div> <!-- .side-selection -->
-                </div> <!-- .ai-side -->
-            </div> <!-- .oponent-selection -->
-
-            <div class="cops-number-selection card">
-                <h2 class="subtitle">Choisissez un nombre de policiers</h2>
-                <form class="form-field">
-                    <div class="form-field-labels">
-                        <label for="copsNum">
-                            Nombre de policier :
-                        </label>
-                    </div>
-                    <div class="form-field-inputs">
-                        <input #copsNumberInput [(ngModel)]="config['copsNumber']" min="1" [max]="getMaxCopsNumber()"
-                            (blur)="onBlur($event)" id="copsNum" type="number" name="cops">
-                    </div>
-                    <button class="form-minus-btn" (click)="updateNumberFieldValue('copsNumber', config, update_action.decrease)">-</button>
-                    <button class="form-plus-btn" (click)="updateNumberFieldValue('copsNumber', config, update_action.increase)">+</button>
-                </form> <!-- .form-field -->
-            </div> <!-- .cops-number-selection -->
-
-            <div class="thief-speed-selection card">
-                <h2 class="subtitle">
-                    Choisissez la
-                    <app-tooltip main_text="vitesse"
-                        tooltip_text="Nombre de sommets que peux parcourir le voleur en 1 tour">
-                    </app-tooltip>
-                    du voleur
-                </h2>
-                <form class="form-field">
-                    <div class="form-filed-labels">
-                        <label for="thiefSpeed">Vitesse du voleur :</label>
-                    </div>
-                    <div class="form-field-inputs">
-                        <input type="number" [(ngModel)]="config['thiefSpeed']" (blur)="onBlur($event)" min="1" id="thiefSpeed"
-                            name="thiefSpeed">
-                    </div>
-                    <button class="form-minus-btn" (click)="updateNumberFieldValue('thiefSpeed', config, update_action.decrease)">-</button>
-                    <button class="form-plus-btn" (click)="updateNumberFieldValue('thiefSpeed', config, update_action.increase)">+</button>
-                </form> <!-- .form-field -->
-            </div> <!-- .thief-speed-selection -->
-
-            <div class="difficulty-selection card">
-                <h2 class="subtitle">Choisissez une difficulté</h2>
-                <div class="difficulty-selection-list">
-                    <div class="difficulty-selection-list-item" [class]="isSelectedEasy()">
-                        <label for="mode1">Facile</label>
-                        <input [(ngModel)]="gameModeSelected" type="radio" id="mode1" name="mode" value="easy">
-                    </div>
-                    <div class="difficulty-selection-list-item" [class]="isSelectedMedium()">
-                        <label for="mode2">Normal</label>
-                        <input [(ngModel)]="gameModeSelected" type="radio" id="mode2" name="mode" value="medium">
-                    </div>
-                    <div class="difficulty-selection-list-item" [class]="isSelectedHard()">
-                        <label for="mode3">Difficile</label>
-                        <input [(ngModel)]="gameModeSelected" type="radio" id="mode3" name="mode" value="hard">
-                    </div>
-                    <div class="difficulty-selection-list-item" [class]="isSelectedExtreme()">
-                        <label for="mode4">Extrême</label>
-                        <input [(ngModel)]="gameModeSelected" type="radio" id="mode4" name="mode" value="extreme">
-                    </div>
-                </div> <!-- .difficulty-selection-list -->
-            </div> <!-- .difficulty-selection -->
-        </div> <!-- .col2 -->
-    </div> <!-- .game-param -->
+  
+  <main class="gm-body">
 
     
-    <button class="fab-bottom-center" [disabled]="checkGraphParamIssues()" (click)="validateParams()">Commencer</button>
-    
+    <section class="gm-col gm-col--graph">
+      <div class="section-card">
+        <h2 class="section-card__title">
+          <span class="section-card__num">01</span>Plateau de jeu
+        </h2>
 
-    <!-- <div class="submit-buttons card">
-        <button [disabled]="checkGraphParamIssues()" (click)="validateParams()">Commencer la partie</button>
-    </div> -->
+        <div class="topology-grid">
+          <button class="topo-tile"
+            *ngFor="let type of availableGraphType"
+            (click)="selectGraphType(type)"
+            [class.is-selected]="isSelectedGraphType(type) === 'selected'">
+            <img class="topo-tile__img" src="assets/menu/graph-img/{{type}}.svg" [alt]="translator.graphTypeName(type)">
+            <span class="topo-tile__label">{{ translator.graphTypeName(type) }}</span>
+          </button>
+
+          
+          <label class="topo-tile topo-tile--import"
+            [class.is-selected]="isSelectedGraphType('import') === 'selected'"
+            (click)="selectGraphType('import')">
+            <input id="graph-file-input" name="graph-file-input" class="sr-only" type="file"
+              accept="application/json" (change)="onFileChange($event.target.files[0])">
+            <span class="topo-tile__icon">↑</span>
+            <span class="topo-tile__label">{{ selectedFileName || 'Importer un graphe' }}</span>
+          </label>
+        </div>
+
+        
+        <div *ngIf="paramsNames.length > 0" class="extra-params">
+          <h3 class="extra-params__title">Paramètres</h3>
+          <div class="param-row" *ngIf="paramsNames.length > 0">
+            <label class="param-row__label">{{ paramsNames[0] }}</label>
+            <div class="param-row__controls">
+              <button class="stepper-btn" (click)="updateNumberFieldValue('graphParam1', config, update_action.decrease)">−</button>
+              <input #param1Input [(ngModel)]="config['graphParam1']"
+                [min]="paramsBoundaries[selectedGraphType].param1"
+                (blur)="onBlur($event)" id="param1" type="number" name="param1" class="stepper-input">
+              <button class="stepper-btn" (click)="updateNumberFieldValue('graphParam1', config, update_action.increase)">+</button>
+            </div>
+          </div>
+          <div class="param-row" *ngIf="paramsNames.length > 1">
+            <label class="param-row__label">{{ paramsNames[1] }}</label>
+            <div class="param-row__controls">
+              <button class="stepper-btn" (click)="updateNumberFieldValue('graphParam2', config, update_action.decrease)">−</button>
+              <input #param2Input [(ngModel)]="config['graphParam2']"
+                [min]="paramsBoundaries[selectedGraphType].param2"
+                (blur)="onBlur($event)" id="param2" type="number" name="param2" class="stepper-input">
+              <button class="stepper-btn" (click)="updateNumberFieldValue('graphParam2', config, update_action.increase)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="gm-col gm-col--options">
+
+      
+      <div class="section-card">
+        <h2 class="section-card__title">
+          <span class="section-card__num">02</span>Adversaire
+        </h2>
+        <div class="option-tiles">
+          <button class="option-tile"
+            *ngFor="let type of availableOpponentType"
+            (click)="selectPlayer(type)"
+            [class.is-selected]="isSelectedOponent(type) === 'selected'">
+            <img class="option-tile__img" src="assets/menu/opponent-type/vs_{{type}}.svg" [alt]="translator.opponentTypeName(type)">
+            <span class="option-tile__label">{{ translator.opponentTypeName(type) }}</span>
+          </button>
+        </div>
+
+        
+        <div class="ai-camp" *ngIf="selectedOpponentType === 'ai'">
+          <h3 class="ai-camp__label">Votre camp</h3>
+          <div class="camp-tiles">
+            <button class="camp-tile" (click)="setSelectedAi('cops')"
+              [class.is-selected]="isSelectedCopsAi() === 'selected'">
+              <img src="assets/menu/opponent-type/thief.svg" alt="Voleur">
+              <span>Voleur</span>
+            </button>
+            <button class="camp-tile" (click)="setSelectedAi('thief')"
+              [class.is-selected]="isSelectedThiefAi() === 'selected'">
+              <img src="assets/menu/opponent-type/police.svg" alt="Gendarme">
+              <span>Gendarme</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="section-card section-card--row">
+        <div class="mini-section">
+          <h2 class="section-card__title">
+            <span class="section-card__num">03</span>Policiers
+          </h2>
+          <div class="param-row__controls">
+            <button class="stepper-btn" (click)="updateNumberFieldValue('copsNumber', config, update_action.decrease)">−</button>
+            <input #copsNumberInput [(ngModel)]="config['copsNumber']" min="1" [max]="getMaxCopsNumber()"
+              (blur)="onBlur($event)" id="copsNum" type="number" name="cops" class="stepper-input stepper-input--lg">
+            <button class="stepper-btn" (click)="updateNumberFieldValue('copsNumber', config, update_action.increase)">+</button>
+          </div>
+        </div>
+
+        <div class="mini-section-divider"></div>
+
+        <div class="mini-section">
+          <h2 class="section-card__title">
+            <span class="section-card__num">04</span>Vitesse du voleur
+          </h2>
+          <div class="param-row__controls">
+            <button class="stepper-btn" (click)="updateNumberFieldValue('thiefSpeed', config, update_action.decrease)">−</button>
+            <input type="number" [(ngModel)]="config['thiefSpeed']" (blur)="onBlur($event)" min="1" id="thiefSpeed"
+              name="thiefSpeed" class="stepper-input stepper-input--lg">
+            <button class="stepper-btn" (click)="updateNumberFieldValue('thiefSpeed', config, update_action.increase)">+</button>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="section-card">
+        <h2 class="section-card__title">
+          <span class="section-card__num">05</span>Difficulté
+        </h2>
+        <div class="diff-tiles">
+          <button class="diff-tile diff-tile--easy"   [class.is-selected]="isSelectedEasy()   === 'selected'" (click)="gameModeSelected = 'easy'">
+            <span class="diff-tile__label">Facile</span>
+            <input [(ngModel)]="gameModeSelected" type="radio" id="mode1" name="mode" value="easy" class="sr-only">
+          </button>
+          <button class="diff-tile diff-tile--normal" [class.is-selected]="isSelectedMedium() === 'selected'" (click)="gameModeSelected = 'medium'">
+            <span class="diff-tile__label">Normal</span>
+            <input [(ngModel)]="gameModeSelected" type="radio" id="mode2" name="mode" value="medium" class="sr-only">
+          </button>
+          <button class="diff-tile diff-tile--hard"   [class.is-selected]="isSelectedHard()   === 'selected'" (click)="gameModeSelected = 'hard'">
+            <span class="diff-tile__label">Difficile</span>
+            <input [(ngModel)]="gameModeSelected" type="radio" id="mode3" name="mode" value="hard" class="sr-only">
+          </button>
+          <button class="diff-tile diff-tile--extreme" [class.is-selected]="isSelectedExtreme() === 'selected'" (click)="gameModeSelected = 'extreme'">
+            <span class="diff-tile__label">Extrême</span>
+            <input [(ngModel)]="gameModeSelected" type="radio" id="mode4" name="mode" value="extreme" class="sr-only">
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  
+  <div class="gm-footer">
+    <button class="start-btn" [disabled]="checkGraphParamIssues()" (click)="validateParams()">
+      <span class="start-btn__label">Commencer la partie</span>
+      <span class="start-btn__arrow">→</span>
+    </button>
+  </div>
 
 </div>

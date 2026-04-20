@@ -41,7 +41,7 @@ export class Adventure {
     }
 
     private async displayEndMessage() {
-        /* alert('THIS IS THE END OF THE ADVENTURE'); */
+        
         this.level_index = 0;
         const result = await Swal.fire({
             title: 'Fin de d\'aventure.',

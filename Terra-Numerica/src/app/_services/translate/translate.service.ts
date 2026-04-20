@@ -46,7 +46,7 @@ export class TranslateService {
       case 'add-node':
         return 'Ajouter un sommet';
       case 'add-link':
-        return 'Ajouter une arrête';
+        return 'Ajouter une arête';
       case 'remove':
         return 'Effacer un élément';
       case 'save':

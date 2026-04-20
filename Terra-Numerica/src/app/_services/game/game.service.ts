@@ -4,7 +4,7 @@ import { Cops } from 'src/app/models/Pawn/Cops/cops';
 import { Pawns } from 'src/app/models/Pawn/pawn';
 import { PawnState } from 'src/app/models/Pawn/PawnState/pawn-state';
 import { Thief } from 'src/app/models/Pawn/Thief/thief';
-import { environment } from 'src/environments/environment';
+import { GlobalPawnStates } from 'src/app/models/Pawn/PawnState/pawn-states';
 import { GameActionStack } from 'src/app/models/GameActionStack/game-action-stack';
 import { GameAction } from 'src/app/models/GameAction/game-action';
 import Swal from 'sweetalert2';
@@ -17,7 +17,6 @@ import { RunawayStrategy } from 'src/app/models/Strategy/Thief/RunawayStrategy/r
 import { WatchingStrategy } from 'src/app/models/Strategy/Cop/WatchingStrategy/watching-strategy';
 import { GridStrategy } from 'src/app/models/Strategy/Cop/GridStrategy/grid-strategy';
 import { OneCopsWinStrategy } from 'src/app/models/Strategy/Cop/OneCopsWinStrategy/one-cops-win-strategy';
-import { StatisticService } from '../statistic/statistic.service';
 import { Grid } from 'src/app/models/Graph/Grid/grid';
 import { Tore } from 'src/app/models/Graph/Grid/Tore/tore';
 import { RandomCopsStrategy } from 'src/app/models/Strategy/Cop/RandomCopsStrategy/random-cops-strategy';
@@ -45,6 +44,7 @@ export class GameService {
   private actionStack: GameActionStack;
   private alreadyEnconteredPos: boolean = false;
   private maxTurnCount: number = 16;
+  private firstMoveDone = false;
 
   private winnerSide: 'thief' | 'cops';
 
@@ -63,16 +63,18 @@ export class GameService {
 
   private ai_thief_strat: () => IStrategy;
   private ai_cops_strat: () => IStrategy;
-  private ai_side = 'cops'; // undefined if no ai, 'cops' if cops are play by ai, 'thief' if thief is play by ai
-  private validateTurnCallback: () => void;
+  private ai_side = 'cops';
+  private validateTurnCallback: () => void | Promise<void>;
   private endLevelCallback: () => Promise<void>;
   displayWarningZone: (value: boolean) => void;
 
-  constructor(private router: Router, private graphService: GraphService, private stat: StatisticService,
+  constructor(private router: Router, private graphService: GraphService,
               private scoreService: ScoreService) {
     this.actionStack = new GameActionStack();
     if (localStorage.getItem("cops") !== null) {
-      this.copsNumber = parseInt(localStorage.getItem("cops"));
+      this.copsNumber = parseInt(localStorage.getItem("cops")) || 1;
+    } else {
+      this.copsNumber = 1;
     }
     if (localStorage.getItem("ai") !== null) {
       this.ai_side = localStorage.getItem("ai");
@@ -136,6 +138,10 @@ export class GameService {
   setAiSide(side: string) {
     this.ai_side = side;
     localStorage.setItem("ai", side);
+  }
+
+  getAiSide() {
+    return this.ai_side;
   }
 
   chooseAIStrat() {
@@ -243,16 +249,14 @@ export class GameService {
   }
 
   async update() {
+    this.checkTurn();
     if (this.placingPawns) {
-      //Check if there is AI
       if (this.ai_side) {
-        // Check if the AI is a thief
         if (this.ai_side === 'thief' && !this.placingCops) {
           for (const t of this.thiefs) {
             if (t.isWaitingPlacement()) t.place(this.graphService.getGraph(), this.cops_position, this.thiefs_position);
           }
         }
-        //Check if AI is cops
         if (this.ai_side === 'cops' && this.placingCops) {
           for (const c of this.cops) {
             if (c.isWaitingPlacement()) {
@@ -261,54 +265,60 @@ export class GameService {
           }
         }
 
-      } //End check if there is AI
+      }
 
       this.checkPlacement();
+      this.checkTurn();
+
       if (!this.placingCops && this.placingPawns) {
-        d3.select(this.HUD_TURN_DETAILS)
-          .text(() => 'Le voleur doit se placer.');
-        if (this.ai_side === 'thief') this.update();
+        const hud = d3.select(this.HUD_TURN_DETAILS);
+        if (!hud.empty()) hud.text(() => 'Le voleur doit se placer.');
+        if (this.ai_side === 'thief') setTimeout(() => this.update(), 500);
       }
       if (!this.placingPawns) {
-        d3.select(this.HUD_TURN_DETAILS)
-          .style('color', 'blue')
-          .text(() => 'C\'est au tour des policiers.');
+        const hud = d3.select(this.HUD_TURN_DETAILS);
+        if (!hud.empty()) {
+          hud.style('color', 'blue')
+             .text(() => 'C\'est au tour des policiers.');
+        }
         this.startGame();
       }
     } else {
-      // Check if there is an AI
       if (this.ai_side) {
-        // Check if this is cops turn and if AI is cops
         if (this.ai_side === 'cops' && !this.thiefTurn) {
-          d3.selectAll(this.HUD_TURN_DETAILS)
-            .style('color', 'black')
-            .text(() => this.cops.length > 1 ? 'Les policiers réfléchissent à leurs déplacements...' : 'Le policier réfléchit à sont déplacement...')
+          const hud = d3.selectAll(this.HUD_TURN_DETAILS);
+          if (!hud.empty()) {
+            hud.style('color', 'black')
+               .text(() => this.cops.length > 1 ? 'Les policiers réfléchissent à leurs déplacements...' : 'Le policier réfléchit à son déplacement...')
+          }
           for (const c of this.cops) {
             await c.move(this.graphService.getGraph(), this.cops_position, this.thiefs_position, c);
           }
-          this.validateTurnCallback(); // DO NOT REFACTOR THESE LINES OUTSIDE OF THEIR RESPECTIVES IF
+          if (this.validateTurnCallback) this.validateTurnCallback();
+          return;
         }
-        // check if this is thief turn and if AI is thief
         else if (this.ai_side === 'thief' && this.thiefTurn) {
-          d3.selectAll(this.HUD_TURN_DETAILS)
-            .style('color', 'black')
-            .text(() => 'Le voleur réfléchit à son déplacement...')
+          const hud = d3.selectAll(this.HUD_TURN_DETAILS);
+          if (!hud.empty()) {
+            hud.style('color', 'black')
+               .text(() => 'Le voleur réfléchit à son déplacement...')
+          }
           for (const t of this.thiefs) {
             await t.move(this.graphService.getGraph(), this.cops_position, this.thiefs_position);
           }
-          this.validateTurnCallback(); // DO NOT REFACTOR THESE LINES OUTSIDE OF THEIR RESPECTIVES IF
+          if (this.validateTurnCallback) this.validateTurnCallback();
+          return;
         }
-      } // End Check if there is an AI
+      }
 
-      //Beta for extreme mode
       if (this.gameMode === 'extreme') {
-        if (this.ai_side === 'undefined' || this.ai_side === undefined) { // if it's a Player VS Player game
+        if (this.ai_side === 'undefined' || this.ai_side === undefined) {
           if (this.thiefTurn) {
             if (this.allThiefsPlayed()) this.validateTurnCallback()
           } else if (!this.thiefTurn) {
             if (this.allCopsPlayed()) this.validateTurnCallback()
           }
-        } else { // if it's a Player VS AI game
+        } else {
           if (this.ai_side === 'cops' && this.thiefTurn) {
             if (this.allThiefsPlayed()) this.validateTurnCallback();
           } else if (this.ai_side === 'thief' && !this.thiefTurn) {
@@ -322,65 +332,54 @@ export class GameService {
     let pile = this.checkCops();
     if (pile.length != this.cops.length) {
       pile.forEach(e => {
-        if (e.length != 1)
-          this.notificate(e[0], e.length);
+        if (e.length != 1) {
+        }
       })
     }
     if (this.turnChanged) {
       this.watchingPositionList.push(JSON.stringify(this.recordPosition()));
     }
-    this.checkTurn();
   }
 
   private recordPosition() {
     let tmpPositionList = []
     this.turnChanged = false;
     this.thiefs.forEach(e => {
-      tmpPositionList.push([e.x, e.y]);
+      tmpPositionList.push(e.currentNodeId);
     })
     this.cops.forEach(e => {
-      tmpPositionList.push([e.x, e.y]);
+      tmpPositionList.push(e.currentNodeId);
     })
-    return tmpPositionList
+    return tmpPositionList;
   }
 
   private checkPlacement() {
     let placing = false;
     let cops = false;
-    for (let i = 0; i < this.thiefs.length; i++) {
-      placing = placing || this.thiefs[i].isWaitingPlacement();
+    if (this.thiefs) {
+      for (let i = 0; i < this.thiefs.length; i++) {
+        placing = placing || this.thiefs[i].isWaitingPlacement();
+      }
     }
-    for (let i = 0; i < this.cops.length; i++) {
-      placing = placing || this.cops[i].isWaitingPlacement();
-      cops = cops || this.cops[i].isWaitingPlacement();
+    if (this.cops) {
+      for (let i = 0; i < this.cops.length; i++) {
+        placing = placing || this.cops[i].isWaitingPlacement();
+        cops = cops || this.cops[i].isWaitingPlacement();
+      }
     }
     this.placingPawns = placing;
     this.placingCops = cops
   }
 
   notificate(pos, number) {
-    let notif = d3.select("svg")
-      .append("g")
-      .attr("id", "notificationBubble")
-    notif.append('circle')
-      .attr("cx", pos.x + 40)
-      .attr("cy", pos.y - 55)
-      .attr("r", 15)
-      .attr("fill", "white")
-      .attr("stroke", "black")
-    notif.append("text")
-      .text(number)
-      .style("font-weight", "bold")
-      .attr('x', pos.x + 35)
-      .attr('y', pos.y - 47.5)
-      .attr("font-size", 20)
+    return;
   }
 
   checkCops() {
-    let num: number = 0;
     let copsPile = [];
     let tmpCopsPile = []
     let alreadyWatchedCops = []
+    if (!this.cops) return copsPile;
     this.cops.forEach(c1 => {
       if (!alreadyWatchedCops.includes(c1)) {
         tmpCopsPile = []
@@ -388,7 +387,7 @@ export class GameService {
         alreadyWatchedCops.push(c1)
         this.cops.forEach(c2 => {
           if (c1.role != c2.role) {
-            if (c1.x == c2.x && c1.y == c2.y) {
+            if (c1.currentNodeId !== undefined && c1.currentNodeId === c2.currentNodeId) {
               tmpCopsPile.push(c2);
               alreadyWatchedCops.push(c2)
             }
@@ -402,15 +401,26 @@ export class GameService {
     return copsPile;
   }
 
-  private startGame() {
+  private async startGame() {
     this.thiefTurn = false;
     this.gameTimer = Date.now();
-    this.setPlayersState(this.cops, environment.onTurnState);
-    //this.turnCount++;
-    this.update();
+    this.setPlayersState(this.cops, GlobalPawnStates.onTurnState);
+
+    if (this.ai_side === 'cops' && !this.firstMoveDone) {
+      this.firstMoveDone = true;
+      for (const c of this.cops) {
+        await c.move(this.graphService.getGraph(), this.cops_position, this.thiefs_position, c);
+      }
+      if (this.validateTurnCallback) {
+        await this.validateTurnCallback();
+      }
+      return;
+    }
+    await this.update();
   }
 
   private setPlayersState(players: Pawns[], state: PawnState) {
+    if (!players) return;
     for (let i = 0; i < players.length; i++) {
       players[i].state = state;
     }
@@ -418,10 +428,11 @@ export class GameService {
 
   private checkEnd() {
     let allThiefCapture = false;
+    if (!this.thiefs || !this.cops) return false;
     for (let i = 0; i < this.thiefs.length; i++) {
       const t = this.thiefs[i];
-      for (let j = 0; i < this.cops.length; i++) {
-        allThiefCapture = allThiefCapture || t.isAtSamePostionAs(this.cops[i]);
+      for (let j = 0; j < this.cops.length; j++) {
+        allThiefCapture = allThiefCapture || t.isAtSamePostionAs(this.cops[j]);
       }
     }
     let timerEnd = this.turnCount > this.maxTurnCount;
@@ -459,35 +470,38 @@ export class GameService {
     if (this.thiefTurn) {
       this.turnChanged = true;
       this.turnCount++;
-      this.setPlayersState(this.cops, environment.waitingTurnState);
-      this.setPlayersState(this.thiefs, environment.onTurnState);
-      d3.select(this.HUD_TURN_DETAILS)
-        .style('color', 'green')
-        .text(() => 'C\'est au tour du voleur.');
+      this.setPlayersState(this.cops, GlobalPawnStates.waitingTurnState);
+      this.setPlayersState(this.thiefs, GlobalPawnStates.onTurnState);
+      const hud = d3.select(this.HUD_TURN_DETAILS);
+      if (!hud.empty()) {
+        hud.style('color', 'green')
+           .text(() => 'C\'est au tour du voleur.');
+      }
     }
     else {
-      this.setPlayersState(this.thiefs, environment.waitingTurnState);
-      this.setPlayersState(this.cops, environment.onTurnState);
-      d3.select(this.HUD_TURN_DETAILS)
-        .style('color', 'blue')
-        .text(() => 'C\'est au tour des policiers.');
+      this.setPlayersState(this.thiefs, GlobalPawnStates.waitingTurnState);
+      this.setPlayersState(this.cops, GlobalPawnStates.onTurnState);
+      const hud = d3.select(this.HUD_TURN_DETAILS);
+      if (!hud.empty()) {
+        hud.style('color', 'blue')
+           .text(() => 'C\'est au tour des policiers.');
+      }
     }
 
     if (this.checkEnd()) {
-      if (!this.isAdventure) { // if it's a free game
+      if (!this.isAdventure) {
         let endTime: any = Date.now();
         this.gameTimer = endTime - this.gameTimer;
         const result = await Swal.fire({
           title: this.winner,
           text: 'Nombre de tours écoulés : ' + this.turnCount + ' Mode de Jeu : ' + this.getGameMode(this.gameMode) + ' Nombre de policiers : ' + this.cops.length + ' Nombre de Voleurs : ' + this.thiefs.length,
           icon: 'success',
-          /* imageUrl: this.scoreService.getScoreImage(this.winnerSide, this.ai_side, this.graphService.getTypology(), this.copsNumber), */
           confirmButtonText: 'Rejouer',
           showCancelButton: true,
           cancelButtonText: 'Retour au Menu'
         })
         return { result: result, gameTimer: this.gameTimer, isAdventure: this.isAdventure };
-      } else { // if it's an adventure
+      } else {
         if(!this.isGameWinByPlayer()) {
           return { wonByPlayer: false, gameTimer: this.gameTimer, isAdventure: this.isAdventure };
         }
@@ -512,7 +526,7 @@ export class GameService {
         return { result: result, gameTimer: this.gameTimer, isAdventure: this.isAdventure };
       }
     } else {
-      this.update()
+      await this.update()
     }
   }
 
@@ -529,16 +543,6 @@ export class GameService {
       default:
         return 'Inconnu';
     }
-  }
-
-  registerStats() {
-    this.stat.postStatistic({
-      gameMode: this.gameMode,
-      turnCount: this.turnCount,
-      copsNumber: this.copsNumber,
-      timer: this.gameTimer,
-      graphType: this.graphService.getGraph().typology,
-    })
   }
 
   goBackToMenu() {
@@ -561,7 +565,7 @@ export class GameService {
     this.placingCops = true;
     this.actionStack = new GameActionStack()
     this.cops_position = []
-    //window.location.reload();
+    this.thiefs_position = []
 
     if (this.isAdventure) {
       return await this.endLevelCallback();
@@ -582,38 +586,41 @@ export class GameService {
     this.alreadyEnconteredPos = false
     this.turnCount = 0;
     this.placingCops = true;
-    this.thiefTurn = true;
+    this.thiefTurn = false;
     this.placingPawns = true;
     this.gameTimer = 0;
+    this.cops_position = []
+    this.thiefs_position = []
   }
 
   checkTurn() {
+    if (!this.thiefs || !this.cops) return;
     this.thiefs.forEach(t => {
-      if (t.state === environment.onTurnState) {
+      if (t.state === GlobalPawnStates.onTurnState) {
         d3.select('.' + t.role)
           .style("opacity", 1)
-      } else if (t.state === environment.waitingTurnState) {
+      } else if (t.state === GlobalPawnStates.waitingTurnState) {
         d3.select('.' + t.role)
           .style("opacity", 0.60);
       }
     });
     this.cops.forEach(c => {
-      if (c.state === environment.onTurnState) {
+      if (c.state === GlobalPawnStates.onTurnState) {
         d3.select('.' + c.role)
           .style("opacity", 1);
-      } else if (c.state === environment.waitingTurnState) {
+      } else if (c.state === GlobalPawnStates.waitingTurnState) {
         d3.select('.' + c.role)
           .style("opacity", 0.60);
       }
     });
   }
 
-  //GameAction related function
   addGameAction(action: GameAction) {
     this.actionStack.push(action);
   }
 
   cancelAction(): boolean {
+    if (this.gameMode === 'easy') return true;
     const sucess = this.actionStack.cancelAction();
     this.checkTurn();
     return sucess;
@@ -682,6 +689,10 @@ export class GameService {
     return (this.ai_side === undefined || this.ai_side === 'undefined') 
             || (this.ai_side === 'thief' && !this.thiefTurn)
             || (this.ai_side === 'cops' && this.thiefTurn)
+  }
+
+  isThiefTurn() {
+    return this.thiefTurn;
   }
 
 }

@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { GameAction } from 'src/app/models/GameAction/game-action';
 import { GameService } from 'src/app/_services/game/game.service';
-import { environment } from 'src/environments/environment';
+import { GlobalPawnStates } from '../pawn-states';
 import { PawnState } from '../pawn-state';
 
 export class PawnStateOnTurn implements PawnState {
@@ -71,7 +71,7 @@ export class PawnStateOnTurn implements PawnState {
             })
         
         if(startPosition.x !== position.x || startPosition.y !== position.y) {
-            gameManager.addGameAction(new GameAction(d, startPosition, {x: position.x, y: position.y}, previousSlot))
+            gameManager.addGameAction(new GameAction(d, startPosition, {x: position.x, y: position.y}));
         } else {
             d.settedPosition = false;
         }
@@ -81,7 +81,7 @@ export class PawnStateOnTurn implements PawnState {
         if (!d.settedPosition) {
             return this;
         } else {
-            return environment.waitingTurnState; 
+            return GlobalPawnStates.waitingTurnState; 
         }
     }
 }

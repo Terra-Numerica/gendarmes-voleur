@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { BackendService } from 'src/app/_services/backend/backend.service';
 import { GraphFileValidatorService } from 'src/app/_services/graph-file-validator/graph-file-validator.service';
 import Swal from 'sweetalert2';
 
@@ -10,33 +9,34 @@ import Swal from 'sweetalert2';
 })
 export class AdminGraphComponent implements OnInit {
 
-  public inputFile: File;
-  public fileContent;
+  public inputFile!: File;
+  public fileContent: string | undefined;
   public line_in_file = 10;
-  private reader: FileReader;
-  public valide_file = undefined;
-  public missingProperties = [];
-  public invalidProperties = [];
+  private reader!: FileReader;
+  public valide_file: boolean | undefined = undefined;
+  public missingProperties: any[] = [];
+  public invalidProperties: any[] = [];
 
-  constructor(private backend: BackendService, private graphFileValidator: GraphFileValidatorService) { }
+  constructor(private graphFileValidator: GraphFileValidatorService) { }
 
   ngOnInit(): void {
     this.reader = new FileReader();
   }
 
-  fileChange(ev) {
+  fileChange(ev: any) {
     this.inputFile = ev.target.files[0];
     this.readFile();
   }
 
   private readFile() {
-    this.reader.onload = (ev) => {
+    this.reader.onload = (ev: any) => {
       this.fileContent = ev.target.result;
       this.checkFileContent();
-    }
-    if(this.inputFile)
+    };
+
+    if (this.inputFile) {
       this.reader.readAsText(this.inputFile, 'utf-8');
-    else {
+    } else {
       this.fileContent = undefined;
       this.valide_file = undefined;
     }
@@ -44,7 +44,7 @@ export class AdminGraphComponent implements OnInit {
 
   private checkFileContent() {
     console.warn('CHECKING FILE CONTENT');
-    const jsonFileContent = JSON.parse(this.fileContent);
+    const jsonFileContent = JSON.parse(this.fileContent as string);
     this.graphFileValidator.setContentToValidate(jsonFileContent);
     this.missingProperties = this.graphFileValidator.missing_properties;
     this.invalidProperties = this.graphFileValidator.invalid_properties;
@@ -52,29 +52,19 @@ export class AdminGraphComponent implements OnInit {
   }
 
   uploadGraph() {
-    if(this.fileContent)
-      this.backend.post('graph', JSON.parse(this.fileContent)).subscribe((graph) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Mise en ligne réussi !',
-          text: 'Le graph est maintenant disponible pour les joueurs dans la catégorie "Aléatoire".'
-        })
-      },
-      err => {
-        console.log(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'La mise en ligne a échoué',
-          text: 'Le graph n\'a pas pu être mis en ligne',
-          footer: `${err.message}`
-        })
-      })
-    else 
-      console.log('YOU MUST SELECT A FILE BEFORE UPLOADING IT')
+    if (!this.fileContent) {
+      console.log('YOU MUST SELECT A FILE BEFORE UPLOADING IT');
+      return;
+    }
+
+    Swal.fire({
+      icon: 'info',
+      title: 'Backend supprimé',
+      text: 'La mise en ligne n’est plus disponible. Vous pouvez toujours valider et utiliser vos graphes localement.'
+    });
   }
 
   isCard() {
-    return this.fileContent ? 'card' : ''
+    return this.fileContent ? 'card' : '';
   }
-
 }

@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { GameService } from 'src/app/_services/game/game.service';
 import { GraphService } from 'src/app/_services/graph/graph.service';
-import { environment } from 'src/environments/environment';
+import { GlobalPawnStates } from './PawnState/pawn-states';
 import { IStrategy } from '../Strategy/istrategy';
 import { PawnState } from './PawnState/pawn-state';
 
@@ -22,14 +22,9 @@ export abstract class Pawns {
 
     strategy: IStrategy;
     state: PawnState;
+    currentNodeId: any; 
 
-    /**
-     * Abstract Pawn object
-     * @param gameManager 
-     * @param graphService 
-     * @param {number} x - X position of the pawn when drawed for the first time on a canvas
-     * @param {number} y - Y position of the pawn when drawed for the first time on a canvas
-     */
+    
     constructor(public gameManager: GameService, public graphService: GraphService, x: number, y: number){
         this.x = x;
         this.y = y;
@@ -38,45 +33,38 @@ export abstract class Pawns {
         this.lastSlot = [];
         this.yourTurn = true;
 
-        // Default state of a pawn : waiting placement on the game board
-        this.state = environment.waitingPlacementState;
+        
+        this.state = GlobalPawnStates.waitingPlacementState;
     }
 
-    /**
-     * Function to set the strategy of a pawn
-     * @param {IStrategy} strat - the next strategy of the pawn
-     */
+    
     setStrategy(strat: IStrategy) {
         this.strategy = strat;
     }
 
-    /**
-     * TODO
-     * @param graph 
-     * @param cops 
-     * @param thiefs 
-     */
+    
     place(graph, cops = [], thiefs = []) {
-        //console.log('PLACING')
         const pos = this.strategy.placement(graph, cops, thiefs);
-        this.updatePosition(pos);
-        d3.select('.'+this.role)
-            .attr("cx", this.x = pos.x)
-            .attr("cy", this.y = pos.y)
-            .raise();
-        this.lastSlot = pos;
-        this.settedPosition = true;
-        this.firstMove = false;
-        this.state = environment.waitingTurnState;
+        if (pos) {
+            this.updatePosition(pos);
+            
+            
+            this.currentNodeId = (pos as any).id !== undefined ? (pos as any).id : pos.index;
+            this.x = pos.x;
+            this.y = pos.y;
+
+            this.lastSlot = pos;
+            this.settedPosition = true;
+            this.firstMove = false;
+            this.state = GlobalPawnStates.waitingTurnState;
+        }
     }
 
-    /**
-     * TODO
-     * @param graph 
-     * @param cops 
-     * @param thiefs 
-     */
+    
     move(graph, cops = [], thiefs = [], c = undefined) {
+        if(this.hasPlayed()) {
+            return Promise.resolve(false);
+        }
         return new Promise(resolve => {
             setTimeout(() => {
                 this.moveCallback(graph, cops, thiefs, c)
@@ -88,80 +76,69 @@ export abstract class Pawns {
     protected moveCallback(graph, cops, thiefs, c) {
         const speed = this.role.includes('thief') ? this.gameManager.getThiefSpeed() : 1;
         const pos = this.strategy.move(graph, cops, thiefs, speed, c);
-        this.updatePosition(pos);
-        /* console.log('THIS', this);
-        console.log('POS', pos) */
-        d3.select('.'+this.role)
-            .attr("cx", this.x = pos.x)
-            .attr("cy", this.y = pos.y)
-            .raise();
-        this.lastSlot = pos;
+        
+        
+        if (pos) {
+            this.updatePosition(pos);
+            this.currentNodeId = (pos as any).id !== undefined ? (pos as any).id : (pos.index !== undefined ? pos.index : this.currentNodeId);
+            this.x = pos.x !== undefined ? pos.x : this.x;
+            this.y = pos.y !== undefined ? pos.y : this.y;
+            this.lastSlot = pos;
+        }
+
         this.settedPosition = true;
         this.firstMove = false;
-        this.state = environment.waitingTurnState;
+        this.state = GlobalPawnStates.waitingTurnState;
     }
 
-    /**
-     * Event handled on start of the drag of the pawn
-     * @param event d3 drag event
-     * @param d data associated to the svg element dragged, it the pawn object itself
-     */
+    
+    undoMove(startPosition) {
+        this.x = startPosition.x;
+        this.y = startPosition.y;
+        this.currentNodeId = startPosition.id !== undefined ? startPosition.id : startPosition.index;
+        this.state = GlobalPawnStates.onTurnState;
+        this.lastSlot = startPosition;
+    }
+
+    
     dragstarted(event, d) {
         this.state.dragstarted(event, d);
     }
 
-    /**
-     * Event handled during the drag of the pawn
-     * @param event d3 drag event
-     * @param d data associated to the svg element dragged, it the pawn object itself
-     */
+    
     dragged(event, d) {
         this.state.dragged(event, d);
     }
 
-    /**
-     * Event handled at the end of the the drag of the pawn
-     * @param event d3 drag event
-     * @param d data associated to the svg element dragged, it the pawn object itself
-     */
+    
     dragended(event, d) {
         this.state = this.state.dragended(event, d, this.gameManager);
         this.gameManager.update();
     }
 
-    /**
-     * Function to check if the pawn state is on WaitingPlacement
-     */
+    
     isWaitingPlacement() {
-        return this.state === environment.waitingPlacementState;
+        return this.state === GlobalPawnStates.waitingPlacementState;
     }
 
-    /**
-     * Function to check if the pawn state is on WaitingTurn
-     */
+    
     hasPlayed() {
-        return this.state === environment.waitingTurnState;
+        return this.state === GlobalPawnStates.waitingTurnState;
     }
 
-    /**
-     * Function to check if the pawn state is on his turn
-     */
+    
     onTurn() {
-        return this.state === environment.onTurnState;
+        return this.state === GlobalPawnStates.onTurnState;
     }
 
-    /**
-     * Function to check if the pawn is at the same position of another pawn
-     * @param {Pawn} pawn - Pawn which we want to check if the pawn is at same position
-     */
+    
     isAtSamePostionAs(pawn: Pawns) {
-        return pawn.x - 5 < this.x && this.x < pawn.x + 5 && pawn.y - 5 < this.y && this.y < pawn.y + 5
+        if (this.currentNodeId === undefined || this.currentNodeId === null || this.currentNodeId === -1) return false;
+        if (pawn.currentNodeId === undefined || pawn.currentNodeId === null || pawn.currentNodeId === -1) return false;
+        return String(this.currentNodeId) === String(pawn.currentNodeId);
     }
 
-    /**
-     * Function used to notify the game service of the new position of pawn
-     * @param node - new position on a graph of the pawn
-     */
+    
     abstract updatePosition(node)
 
 }

@@ -11,7 +11,7 @@ $body_color: Gainsboro;
 $card_background_color: snow;
 $card_radius: 1em;
 
-/* You can add global styles to this file, and also import other style files */
+
 html {
     height: 100%;
 }
@@ -56,7 +56,7 @@ button:disabled {
     opacity: 1 !important;
 }
 
-// Better display for input file
+
 .input-file {
     display: none;
 }
@@ -73,7 +73,7 @@ button:disabled {
     cursor: pointer;
 }
 
-//Test fixed position
+
 .fab-bottom-center {
     position: fixed;
     bottom: 3em;

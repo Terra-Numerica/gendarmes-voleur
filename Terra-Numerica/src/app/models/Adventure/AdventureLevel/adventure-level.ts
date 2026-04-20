@@ -22,7 +22,7 @@ export class AdventureLevel {
 
     getCopsNumber() { return this.copsNumber; }
 
-    /* getOpponentType() { return this.opponentType; } */
+    
 
     getThiefSpeed() { return this.thiefSpeed; }
 

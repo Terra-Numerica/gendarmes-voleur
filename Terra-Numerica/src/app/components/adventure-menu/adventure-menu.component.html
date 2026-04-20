@@ -1,19 +1,56 @@
-<!-- <p>adventure-menu works!</p> -->
 <div class="adventure-menu">
-    <div class="header card">
-        <button routerLink="/game-mode-selection">
-            <img src="assets/arrow.svg" alt="">
-        </button>
-        <span class="title">Menu d'aventure</span>
+
+  
+  <div class="am-bg" aria-hidden="true">
+    <div class="am-bg__orb am-bg__orb--1"></div>
+    <div class="am-bg__orb am-bg__orb--2"></div>
+    <div class="am-bg__orb am-bg__orb--3"></div>
+  </div>
+
+  
+  <header class="am-header">
+    <button class="am-header__back" routerLink="/game-mode-selection" title="Retour">
+      <img src="assets/arrow.svg" alt="retour">
+    </button>
+    <div class="am-header__center">
+      <span class="am-header__eyebrow">Terra Numerica</span>
+      <h1 class="am-header__title">Mode Aventure</h1>
     </div>
-    <div class="adventure-selector card">
-        <!-- Explications d'aventure -->
-        <div *ngFor="let adventure of adventures; let i = index" class="adventure card" [class]="isSelected(adventure)" (click)="selectAdventure(adventure)">
-            <img [src]="adventure.picture" width="100px"/>
-            <span>{{adventure.getName()}}</span>
-        </div>
+    <div class="am-header__spacer"></div>
+  </header>
+
+  
+  <p class="am-subtitle">Choisissez votre aventure et affrontez des défis progressifs.</p>
+
+  
+  <main class="am-selector">
+    <div
+      class="am-card"
+      *ngFor="let adventure of adventures; let i = index"
+      [class.is-selected]="isSelected(adventure) === 'selected'"
+      (click)="selectAdventure(adventure)"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="adventure.getName()"
+    >
+      <div class="am-card__badge">{{ i + 1 }}</div>
+      <div class="am-card__img-wrap">
+        <img [src]="adventure.picture" [alt]="adventure.getName()" class="am-card__img">
+      </div>
+      <div class="am-card__body">
+        <h2 class="am-card__name">{{ adventure.getName() }}</h2>
+      </div>
+      <div class="am-card__check" aria-hidden="true">✓</div>
     </div>
-    <div class="buttons card">
-        <button class="start-btn" (click)="launchAdventure()">Commencer : "{{selected_adventure.getName()}}"</button>
-    </div>
+  </main>
+
+  
+  <footer class="am-footer">
+    <button class="am-start-btn" (click)="launchAdventure()">
+      <span class="am-start-btn__icon">▶</span>
+      <span class="am-start-btn__label">Commencer « {{ selected_adventure.getName() }} »</span>
+      <span class="am-start-btn__arrow">→</span>
+    </button>
+  </footer>
+
 </div>

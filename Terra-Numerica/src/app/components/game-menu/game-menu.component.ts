@@ -20,7 +20,7 @@ export class GameMenuComponent implements OnInit {
 
   public selectedGraphType = 'grid';
   public selectedOpponentType = 'ai';
-  public availableGraphType = ['grid', 'tore', 'cycle', 'tree', 'copsAlwaysWin', 'petersen', 'dodecahedron'] //, 'random'];
+  public availableGraphType = ['grid', 'tore', 'cycle', 'tree', 'copsAlwaysWin', 'petersen', 'dodecahedron'] 
   public availableOpponentType = ['ai', 'player'];
   public paramsBoundaries = {
     grid: {
@@ -70,10 +70,7 @@ export class GameMenuComponent implements OnInit {
   public selectedAi = 'cops'
 
   public paramsNames;
-  /* public graphParam1 = 0;
-  public graphParam2 = 0
-  public cops: number = 1;
-  public thiefSpeed: number = 1; */
+  
 
   public config = {
     'graphParam1': 0,
@@ -200,9 +197,9 @@ export class GameMenuComponent implements OnInit {
       if (this.graphGeneration) {
         await this.graphService.generateGraph(this.selectedGraphType, [this.config['graphParam1'], this.config['graphParam2']])
       }
-      // else if (this.graphImportation) {
-      //   this.graphService.loadGraphFromFile(this.inputGraphJSONFile);
-      // }
+      
+      
+      
       
       switch (this.gameModeSelected) {
         case "easy":
@@ -216,10 +213,10 @@ export class GameMenuComponent implements OnInit {
       }
       const extras: NavigationExtras = {
         queryParams: {
-          // copsNum: this.cops,
-          // graphType: this.selectedGraphType,
-          // oppenent: this.selectedOpponentType,
-          // graphParams: [this.graphParam1, this.graphParam2],
+          
+          
+          
+          
           gameMode: this.gameModeSelected
         }
       }
@@ -272,7 +269,7 @@ export class GameMenuComponent implements OnInit {
   selectGraphImportation() {
     this.graphGeneration = false;
     this.graphImportation = true;
-    /* this.selectedGraphType = 'grid' */
+    
   }
 
   isSeletectedGraphGeneration() {

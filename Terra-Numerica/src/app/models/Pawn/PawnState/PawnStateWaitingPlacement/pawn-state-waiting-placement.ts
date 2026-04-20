@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { environment } from 'src/environments/environment';
+import { GlobalPawnStates } from '../pawn-states';
 import { PawnState } from '../pawn-state';
 import { PawnStateOnTurn } from '../PawnStateOnTurn/pawn-state-on-turn';
 import { PawnStateWaitingTurn } from '../PawnStateWaitingTurn/pawn-state-waiting-turn';
@@ -59,7 +59,7 @@ export class PawnStateWaitingPlacement implements PawnState {
         if (!d.settedPosition) {
             return this;
         } else {
-            return environment.waitingTurnState; 
+            return GlobalPawnStates.waitingTurnState; 
         }
     }
 }

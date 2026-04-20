@@ -6,33 +6,19 @@ import { OneCopsWinStrategy } from '../../Strategy/Cop/OneCopsWinStrategy/one-co
 
 export class Cops extends Pawns {
 
-    /**
-     * Concrete Pawn object
-     * @param gameM 
-     * @param graphServ 
-     * @param {number} x - X position of the pawn when drawed for the first time on a canvas
-     * @param {number} y - Y position of the pawn when drawed for the first time on a canvas
-     * @param {number} id - Needed to differanciate a cops from another 
-     */
+    
     constructor(private gameM: GameService, private graphServ: GraphService, x: number, y: number, id: number){
         super(gameM, graphServ, x, y);
         this.role = "cops"+id
         this.strategy = new OneCopsWinStrategy();
-        d3.select("svg")
-        .append('circle')
-            .datum(this)
-            .attr("class", "pawns "+ this.role)
-            .attr("cx", this.x)
-            .attr("cy", this.y)
-            .attr("r", this.radius)
-            .style("fill", "url(#pawnCopsImage)")
-            .call(d3.drag()
-                .on("start", this.dragstarted.bind(this))
-                .on("drag", this.dragged.bind(this))
-                .on("end", this.dragended.bind(this)));
+        
+        
       }
 
-      updatePosition(node) {
-          if(node) this.gameM.updateCopsPosition(this, node);
+      updatePosition(node: any) {
+        if (node) {
+            this.currentNodeId = node.id !== undefined ? Number(node.id) : Number(node.index);
+            this.gameM.updateCopsPosition(this, node);
+        }
       }
 }

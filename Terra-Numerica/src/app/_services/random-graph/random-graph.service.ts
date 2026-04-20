@@ -1,26 +1,32 @@
 import { Injectable } from '@angular/core';
-import { BackendService } from '../backend/backend.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RandomGraphService {
 
-  private graphs;
+  private graphs: any[] = [];
 
-  constructor(private backend: BackendService) {}
+  constructor() {
+    this.loadGraphs();
+  }
 
   loadGraphs() {
-    this.backend.get('graph').subscribe(graphs => {
-      this.graphs = graphs;
-    });
+    this.graphs = [];
   }
 
   getRandomGraph() {
+    if (!this.graphs || this.graphs.length === 0) {
+      return {
+        nodes: [],
+        links: []
+      };
+    }
+
     return this.graphs[this.getRandomInt(this.graphs.length)];
   }
 
-  private getRandomInt(max) {
+  private getRandomInt(max: number) {
     return Math.floor(Math.random() * Math.floor(max));
   }
 }

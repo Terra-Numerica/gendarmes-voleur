@@ -1,36 +1,19 @@
 import { Injectable } from '@angular/core';
-import { BackendService } from '../backend/backend.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StatisticService {
 
-  private route = 'stat';
-  private statistics = [];
+  private statistics: any[] = [];
 
-  constructor(private backend: BackendService) {
-    this.getStatistics();
-  }
+  constructor() {}
 
   getStatistics(): Promise<Object[]> {
-    let resolveFunc: (res: Object[]) => void;
-    const promise = new Promise<Object[]>((resolve) => {
-      resolveFunc = resolve;
-    })
-
-    this.backend.get(this.route).subscribe(stats => {
-      this.statistics = stats;
-      console.log(this.statistics);
-      resolveFunc(this.statistics);
-    })
-
-    return promise;
+    return Promise.resolve(this.statistics);
   }
 
-  postStatistic(stat) {
-    this.backend.post(this.route, stat).subscribe(stat => {
-      console.log(`${stat} is post on the server`);
-    })
+  postStatistic(stat: any) {
+    this.statistics.push(stat);
   }
 }

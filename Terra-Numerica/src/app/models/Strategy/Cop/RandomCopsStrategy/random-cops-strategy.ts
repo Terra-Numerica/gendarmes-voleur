@@ -10,15 +10,20 @@ export class RandomCopsStrategy implements IStrategy {
     }
 
     move(graph: Graph, cops_position_slot: any[], thiefs_position_slot: any[], speed = 1) {
-        /* this.actual_place = graph.getRandomAccessibleEdges(this.actual_place, speed); */
         let vertex = null;
-        const edges = graph.edges(this.actual_place).forEach(n => {
+        const availableEdges = graph.edges(this.actual_place, speed);
+        
+        
+        for (const n of availableEdges) {
             for(const p of thiefs_position_slot) {
-                if(graph.distance(n, p) < 1) {
-                    vertex = n
+                if(p && graph.distance(n, p) === 0) {
+                    vertex = n;
+                    break;
                 }
             }
-        })
+            if (vertex) break;
+        }
+
         if(vertex === null) vertex = graph.getRandomAccessibleEdges(this.actual_place, speed);
 
         this.actual_place = vertex;

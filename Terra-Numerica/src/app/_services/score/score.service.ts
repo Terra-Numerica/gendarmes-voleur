@@ -15,7 +15,7 @@ export class ScoreService {
 
   private calculateScore(winner_side: 'thief' | 'cops', ai_side: string, graph_typology: string, cops_number: number) {
     let score = '3_stars';
-    if(ai_side && (winner_side === ai_side)) { // AI win the game
+    if(ai_side && (winner_side === ai_side)) { 
       score = '0_star';
     } else {
       switch (graph_typology) {

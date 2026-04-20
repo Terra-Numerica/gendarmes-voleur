@@ -21,14 +21,10 @@ export abstract class Graph {
         this.allowedToMove = allowedToMove
     }
 
-    /* ---------- GRAPH DRAWING ---------- */
-    /**
-     * Function who populate an html svg canvas with circles and lines to represent a graph
-     * @param svg d3 selection of an html svg
-     */
+    
+    
     draw(svg: any) {
-        /* console.log('LINKS', this.links)
-        console.log('NODES', this.nodes) */
+        
 
         this.svgLinks = svg.selectAll("line")
             .data(this.links)
@@ -45,7 +41,7 @@ export abstract class Graph {
                 .call(
                     d3.drag()
                     .on('start', (event: DragEvent) => {
-                        /* console.log('OTHER') */
+                        
                         this.dragstarted(event)
                     })
                     .on('drag', (event: DragEvent) => {
@@ -60,15 +56,15 @@ export abstract class Graph {
 
     }
 
-    // Drag & Drop Functions
+    
     dragstarted(event) {
       if(this.allowedToMove) {
-        /* console.log('EVENT', event) */
+        
         this.movingCircleOriginalPosition = {
           x: event.sourceEvent.target.cx.baseVal.value,
           y: event.sourceEvent.target.cy.baseVal.value
         }
-        /* console.log('HERE WE ARE', this.movingCircleOriginalPosition) */
+        
         d3.select(event.sourceEvent.target).attr('stroke', 'black');
       }
     }
@@ -84,10 +80,7 @@ export abstract class Graph {
         if(this.allowedToMove) {
             const circle = d3.select(event.sourceEvent.target)
             circle.attr('stroke', null);
-            /* const endPositon = {
-                x: +circle.attr('cx'),
-                y: +circle.attr('cy')
-            } */
+            
             this.moveNode(this.movingCircleOriginalPosition, {x: +circle.attr('cx'), y: +circle.attr('cy')})
         }
     }
@@ -96,7 +89,7 @@ export abstract class Graph {
         const nodeIndex = this.nodes.findIndex(node => this.checkApproximativeCirclePosition(node, movingCircle))
 
         this.links.forEach((link) => {
-            /* console.log('LINK', link) */
+            
             if (link.source.index === nodeIndex || link.source === nodeIndex) {
                 const lines = d3.selectAll('line').nodes();
                 for(const l of lines) {
@@ -137,44 +130,48 @@ export abstract class Graph {
                 && (originalPosition.y -1 < newPosition.y && newPosition.y < originalPosition.y + 1)
     }
 
-    /**
-     * Function to generate de the D3 network datum for the good use of the graph
-     * @param svg d3 selection of an html svg
-     */
+    
     abstract simulate(svg: any): void;
 
     abstract stop();
 
-    /**
-     * Function needed by the force simulation of D3.js library
-     */
+    
     abstract ticked(): void;
 
-    /* ---------- GRAPH COMPUTATIONS ---------- */
+    
 
     getRandomEdge(): SimulationNodeDatum {
-        return {...this._nodes[this.getRandomInt(this._nodes.length-1)]};
+        return {...this._nodes[this.getRandomInt(this._nodes.length)]};
     }
 
-    /**
-     * Tool function to compute the edges of a node for a graph
-     * @param {any} node - from where you need to computes edges
-     * @returns {SimulationNodeDatum[]} list of edges of the node param
-     */
+    
     edges(node, speed = 1, exclude= []): SimulationNodeDatum[] {
         const edges = [];
-        if(node.index === undefined) {
-            node = node.__data__
+        if (!node) return edges;
+
+        
+        if((node as any).index === undefined && (node as any).__data__) {
+            node = (node as any).__data__
         }
-        for(const l of this.links) {
-            if(l.source.index === node.index) {
-                edges.push(this._nodes.find(n => n.index === l.target.index))
-            } else if (l.target.index === node.index) {
-                edges.push(this._nodes.find(n => n.index === l.source.index))
-            } else if (l.source === node.index) {
-                edges.push(this._nodes.find(n => n.index === l.target))
-            } else if (l.target === node.index) {
-                edges.push(this._nodes.find(n => n.index === l.source))
+        
+        const nodeIndex = (node as any).id !== undefined ? (node as any).id : (node as any).index;
+
+        if (nodeIndex === undefined) return edges;
+
+        for(const l of this._links) {
+            let source = l.source;
+            let target = l.target;
+
+            
+            const sIndex = (source && source.index !== undefined) ? source.index : ((source && source.id !== undefined) ? source.id : source);
+            const tIndex = (target && target.index !== undefined) ? target.index : ((target && target.id !== undefined) ? target.id : target);
+
+            if(sIndex === nodeIndex) {
+                const neighbor = this._nodes.find(n => ((n as any).id !== undefined ? (n as any).id : n.index) === tIndex);
+                if (neighbor) edges.push(neighbor);
+            } else if (tIndex === nodeIndex) {
+                const neighbor = this._nodes.find(n => ((n as any).id !== undefined ? (n as any).id : n.index) === sIndex);
+                if (neighbor) edges.push(neighbor);
             }
         }
         if(speed > 1) {
@@ -184,18 +181,15 @@ export abstract class Graph {
     }
 
     private globalEdges(edges, speed, exclude = []) {
-        let result: any[] = edges;
+        let result: any[] = [...edges];
         let new_edges = [...edges];
         while(speed !== 0) {
-            /* console.log('EXCLUDING EDGES', exclude)
-            console.log('NEW EDGES', new_edges) */
             const tmp = [];
             for(const e of new_edges) {
-                //console.log('THERE', exclude.includes(e))
                 if(!exclude.includes(e)) {
                     this.edges(e).forEach(n => {
-                        /* console.log('FIND', exclude.some(el => el.index === n.index)) */
-                        if(!result.find(el => el.index === n.index) && !exclude.some(el => el.index === n.index)) {
+                        const nId = (n as any).id !== undefined ? (n as any).id : n.index;
+                        if(!result.find(el => ((el as any).id !== undefined ? (el as any).id : el.index) === nId) && !exclude.some(el => ((el as any).id !== undefined ? (el as any).id : el.index) === nId)) {
                             result.push(n);
                             tmp.push(n)
                         } 
@@ -208,57 +202,61 @@ export abstract class Graph {
         return result;
     }
 
-    /**
-     * Function to get a random edge of a node of a graph
-     * @param n node from where you need to get a random edge
-     * @returns a random edge of the input node
-     */
+    
     getRandomAccessibleEdges(n, speed) {
         const edges = this.edges(n, speed);
+        if (edges.length === 0) return n;
         return edges[this.getRandomInt(edges.length)];
     }
 
     distance(n1, n2) {
-        if(n2.index === undefined) { // DO NOT CHANGE TO if(!n2.index) because index use number
-            n2 = {index: +n2}
-        }
+        if (!n1 || n2 === undefined || n2 === null) return -1;
+        const n1Id = (n1 as any).id !== undefined ? (n1 as any).id : (n1 as any).index;
+        const n2Id = (n2 as any).id !== undefined ? (n2 as any).id : ((n2 as any).index !== undefined ? (n2 as any).index : +n2);
 
         let distance = 0;
         let marked = [];
-        marked.push(n1.index);
-        if(n1.index===n2.index) {
+        marked.push(n1Id);
+        if(n1Id === n2Id) {
             return distance;
         }
 
-        
-        let edges = this.edges(n1).filter(e => !(marked.includes(e.index)));
+        let edges = this.edges(n1).filter(e => {
+            const eId = (e as any).id !== undefined ? (e as any).id : e.index;
+            return !(marked.includes(eId));
+        });
         
         while(edges.length > 0) {
             distance++;
             for(const e of edges) {
-                if(e.index == n2.index) return distance;
+                const eId = (e as any).id !== undefined ? (e as any).id : e.index;
+                if(eId == n2Id) return distance;
             }
             const save =  edges;
             edges = []
             for(const e of save) {
-                const temp = this.edges(e).filter(i => !(marked.includes(i.index))).forEach(edge => {
-                    let isIn = false
-                    for(const i of edges) {
-                        if(i.index === edge.index) {
-                            isIn = true;
+                const eId = (e as any).id !== undefined ? (e as any).id : e.index;
+                this.edges(e).forEach(edge => {
+                    const edgeId = (edge as any).id !== undefined ? (edge as any).id : edge.index;
+                    if (!(marked.includes(edgeId))) {
+                        let isIn = false
+                        for(const i of edges) {
+                            if(((i as any).id !== undefined ? (i as any).id : i.index) === edgeId) {
+                                isIn = true;
+                            }
                         }
+                        if(!isIn) edges.push(edge)
                     }
-                    if(!isIn) edges.push(edge)
                 })
-                marked.push(e.index);
+                marked.push(eId);
             }
         }
         return -1;
     }
 
-    /* ---------- PROPERTIES ---------- */
+    
 
-    // GETTERS
+    
     get nodes() {
         return this._nodes
     }
@@ -279,7 +277,7 @@ export abstract class Graph {
         return this._svgLinks
     }
 
-    // SETTERS
+    
 
     set nodes(n) {
         this._nodes = n;
@@ -301,7 +299,7 @@ export abstract class Graph {
         this._svgLinks = links
     }
 
-    /* -------------------------------- */
+    
     private getRandomInt(max) {
         return Math.floor(Math.random() * Math.floor(max));
     }
