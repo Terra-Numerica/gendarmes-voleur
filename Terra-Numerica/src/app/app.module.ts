@@ -20,6 +20,7 @@ import { TooltipComponent } from './components/tooltip/tooltip.component';
 import { CopsAndRobberGameModeSelectionComponent } from './components/cops-and-robber-game-mode-selection/cops-and-robber-game-mode-selection.component';
 import { AdventureMenuComponent } from './components/adventure-menu/adventure-menu.component';
 import { CreditComponent } from './components/credit/credit.component';
+import { RulesComponent } from './components/rules/rules.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { CreditComponent } from './components/credit/credit.component';
     TooltipComponent,
     CopsAndRobberGameModeSelectionComponent,
     AdventureMenuComponent,
-    CreditComponent
+    CreditComponent,
+    RulesComponent
   ],
   imports: [
     BrowserModule,

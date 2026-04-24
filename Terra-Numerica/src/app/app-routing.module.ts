@@ -6,6 +6,7 @@ import { CreditComponent } from './components/credit/credit.component';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { GameMenuComponent } from './components/game-menu/game-menu.component';
 import { GraphConstructorComponent } from './components/graph-constructor/graph-constructor.component';
+import { RulesComponent } from './components/rules/rules.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: '/game-mode-selection' },
@@ -15,6 +16,7 @@ const routes: Routes = [
   { path: 'graph-constructor', component: GraphConstructorComponent },
   { path: 'adventure-menu', component: AdventureMenuComponent },
   { path: 'credit', component: CreditComponent },
+  { path: 'rules', component: RulesComponent }
 ];
 
 @NgModule({

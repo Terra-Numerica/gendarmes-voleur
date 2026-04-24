@@ -40,16 +40,14 @@
       <div class="am-card__body">
         <h2 class="am-card__name">{{ adventure.getName() }}</h2>
       </div>
-      <div class="am-card__check" aria-hidden="true">✓</div>
     </div>
   </main>
 
   
   <footer class="am-footer">
     <button class="am-start-btn" (click)="launchAdventure()">
-      <span class="am-start-btn__icon">▶</span>
-      <span class="am-start-btn__label">Commencer « {{ selected_adventure.getName() }} »</span>
-      <span class="am-start-btn__arrow">→</span>
+      <span class="am-start-btn__label">Commencer {{ selected_adventure.getName() }}</span>
+      <span class="am-start-btn__arrow"> →</span>
     </button>
   </footer>
 

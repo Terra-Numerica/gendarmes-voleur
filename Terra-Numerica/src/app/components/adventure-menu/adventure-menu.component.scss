@@ -1,8 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Nunito:wght@400;500;600;700&display=swap');
 
-
-
-
 $bg: #f6f4ef;
 $surface: rgba(255, 255, 255, 0.82);
 $surface-strong: rgba(255, 255, 255, 0.95);
@@ -21,10 +18,6 @@ $font-body: 'Nunito', sans-serif;
 
 $radius: 18px;
 $shadow-card: 0 10px 28px rgba(60, 40, 20, 0.08);
-$shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
-
-
-
 
 ::ng-deep body {
   margin: 0;
@@ -37,9 +30,6 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
 * {
   box-sizing: border-box;
 }
-
-
-
 
 .adventure-menu {
   position: relative;
@@ -60,14 +50,10 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
   font-family: $font-body;
 }
 
-
-
-
 .am-bg {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  overflow: hidden;
 
   &__orb {
     position: absolute;
@@ -82,7 +68,6 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
     top: -120px;
     left: -80px;
     background: #b38cf0;
-    animation: orbDrift 18s ease-in-out infinite alternate;
   }
 
   &__orb--2 {
@@ -91,7 +76,6 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
     right: -70px;
     bottom: -70px;
     background: #f0b24d;
-    animation: orbDrift 22s ease-in-out infinite alternate-reverse;
   }
 
   &__orb--3 {
@@ -102,12 +86,35 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
     background: #7ec7e8;
     transform: translate(-50%, -50%);
     opacity: 0.08;
-    animation: orbDrift 28s ease-in-out infinite alternate;
   }
 }
 
+/* ✅ BOUTON RETOUR CORRIGÉ */
+.am-header__back {
+  width: 64px;
+  height: 64px;
+  border: 1.5px solid rgba(26, 22, 18, 0.25);
+  border-radius: 8px;
+  background: #f7f3ed;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(26, 22, 18, 0.06), 0 8px 24px rgba(26, 22, 18, 0.08);
+  transition: all 0.18s ease;
 
+  img {
+    width: 30px;
+    height: 30px;
+    filter: brightness(0) saturate(100%) invert(8%) sepia(11%) saturate(870%) hue-rotate(349deg) brightness(94%) contrast(96%);
+  }
 
+  &:hover {
+    background: #fdf0ec;
+    border-color: #c0392b;
+    transform: translateX(-3px);
+  }
+}
 
 .am-header {
   position: relative;
@@ -119,44 +126,6 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
   align-items: center;
   gap: 16px;
   padding: 24px 0 8px;
-
-  animation: fadeUp 0.5s ease both;
-
-  &__back {
-    width: 40px;
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-
-    background: $surface;
-    border: 1px solid $border;
-    border-radius: 10px;
-    cursor: pointer;
-
-    transition:
-      background 0.18s ease,
-      border-color 0.18s ease,
-      transform 0.18s ease;
-
-    img {
-      width: 18px;
-      display: block;
-      opacity: 0.65;
-    }
-
-    &:hover {
-      background: $surface-strong;
-      border-color: rgba(80, 60, 30, 0.18);
-      transform: translateY(-1px);
-
-      img {
-        opacity: 0.95;
-      }
-    }
-  }
 
   &__center {
     flex: 1;
@@ -179,60 +148,35 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
     font-family: $font-title;
     font-size: clamp(1.6rem, 3vw, 2.2rem);
     font-weight: 700;
-    letter-spacing: -0.02em;
     color: $text;
   }
 
   &__spacer {
-    width: 40px;
+    width: 64px;
     flex-shrink: 0;
   }
 }
 
-
-
-
 .am-subtitle {
-  position: relative;
-  z-index: 2;
   margin: 0 0 24px;
-
   font-family: $font-title;
   font-size: 0.92rem;
   font-style: italic;
   color: $text-mid;
-
-  animation: fadeUp 0.5s 0.08s ease both;
 }
 
-
-
-
 .am-selector {
-  position: relative;
-  z-index: 2;
-
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-content: flex-start;
   gap: 16px;
-
   width: 100%;
   max-width: 1000px;
-  flex: 1;
-
-  animation: fadeUp 0.5s 0.14s ease both;
 }
 
-
-
-
 .am-card {
-  position: relative;
   width: 172px;
-  padding: 20px 16px 18px;
-
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -244,263 +188,43 @@ $shadow-soft: 0 8px 20px rgba(60, 40, 20, 0.05);
   box-shadow: $shadow-card;
 
   cursor: pointer;
-  outline: none;
-  overflow: hidden;
+  transition: all 0.2s ease;
 
-  transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    background 0.22s ease,
-    box-shadow 0.22s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(215, 169, 40, 0.10) 0%, transparent 68%);
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    pointer-events: none;
-  }
-
-  &:hover,
-  &:focus {
+  &:hover {
     transform: translateY(-4px);
-    border-color: rgba(215, 169, 40, 0.28);
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 14px 30px rgba(60, 40, 20, 0.12);
-
-    &::before {
-      opacity: 1;
-    }
-
-    .am-card__img {
-      transform: scale(1.05);
-    }
-  }
-
-  &.is-selected {
-    background: $gold-dim;
     border-color: $gold;
-    box-shadow: 0 0 0 3px rgba(215, 169, 40, 0.08), 0 14px 30px rgba(60, 40, 20, 0.12);
-
-    &::before {
-      opacity: 1;
-    }
-
-    .am-card__check {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .am-card__badge {
-      background: $gold;
-      color: #ffffff;
-      border-color: rgba(215, 169, 40, 0.4);
-    }
-
-    .am-card__name {
-      color: $gold;
-    }
-  }
-
-  &__badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-
-    width: 24px;
-    height: 24px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid $border;
-    border-radius: 6px;
-
-    font-family: $font-body;
-    font-size: 0.66rem;
-    font-weight: 800;
-    color: $text-mid;
-
-    transition:
-      background 0.22s ease,
-      color 0.22s ease,
-      border-color 0.22s ease;
-  }
-
-  &__check {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: $gold;
-
-    opacity: 0;
-    transform: scale(0.5);
-    transition:
-      opacity 0.2s ease,
-      transform 0.22s ease;
-  }
-
-  &__img-wrap {
-    width: 88px;
-    height: 88px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-
-    background: $surface-strong;
-    border-radius: 14px;
-    overflow: hidden;
   }
 
   &__img {
     width: 70px;
-    height: 70px;
-    object-fit: contain;
-    transition: transform 0.22s ease;
   }
 
   &__name {
-    margin: 0;
-    text-align: center;
-    line-height: 1.3;
-
     font-family: $font-title;
     font-size: 0.9rem;
     font-weight: 600;
-    color: $text;
-
-    transition: color 0.22s ease;
+    text-align: center;
   }
 }
 
-
-
-
 .am-footer {
-  position: relative;
-  z-index: 2;
   width: 100%;
   max-width: 600px;
   padding-top: 24px;
-
-  animation: fadeUp 0.5s 0.22s ease both;
 }
 
 .am-start-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-
   width: 100%;
-  padding: 15px 28px;
-
+  padding: 15px;
   background: $gold;
-  color: #ffffff;
+  color: white;
   border: none;
   border-radius: 999px;
-
   font-family: $font-title;
-  font-size: 1rem;
   font-weight: 700;
-  font-style: italic;
-  letter-spacing: 0.01em;
-
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(215, 169, 40, 0.22);
-
-  transition:
-    background 0.18s ease,
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-
-  &__icon {
-    font-size: 0.85rem;
-  }
-
-  &__label {
-    flex: 1;
-    text-align: center;
-  }
-
-  &__arrow {
-    font-size: 1rem;
-    font-style: normal;
-    transition: transform 0.18s ease;
-  }
 
   &:hover {
     background: lighten($gold, 6%);
-    box-shadow: 0 14px 28px rgba(215, 169, 40, 0.28);
-
-    .am-start-btn__arrow {
-      transform: translateX(3px);
-    }
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-
-
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes orbDrift {
-  from {
-    transform: translate(0, 0);
-  }
-  to {
-    transform: translate(24px, 16px);
-  }
-}
-
-
-
-
-@media (max-width: 600px) {
-  .am-selector {
-    gap: 10px;
-  }
-
-  .am-card {
-    width: calc(50% - 10px);
-    min-width: 130px;
-    padding: 18px 12px 14px;
-  }
-
-  .am-card__img-wrap {
-    width: 70px;
-    height: 70px;
-  }
-
-  .am-card__img {
-    width: 56px;
-    height: 56px;
-  }
-
-  .am-start-btn {
-    padding: 14px 20px;
-    font-size: 0.9rem;
   }
 }
